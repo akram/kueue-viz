@@ -2,5 +2,6 @@ fastapi
 uvicorn
 kubernetes
 fastapi-cors
+websockets
 
 
