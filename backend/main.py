@@ -54,7 +54,11 @@ class ConnectionManager:
 
     async def broadcast(self, message: dict):
         for connection in self.active_connections:
-            await connection.send_json(message)
+            try:
+                await connection.send_json(message)
+            except Exception as e:
+                print(f"Error sending message: {e}")
+                self.disconnect(connection)
 
 manager = ConnectionManager()
 
@@ -71,4 +75,7 @@ async def websocket_endpoint(websocket: WebSocket):
             await manager.broadcast(data)
             await asyncio.sleep(5)  # Polling interval: 5 seconds
     except WebSocketDisconnect:
+        manager.disconnect(websocket)
+    except Exception as e:
+        print(f"Unhandled exception in WebSocket endpoint: {e}")
         manager.disconnect(websocket)
