@@ -1,7 +1,8 @@
 
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Grid, Paper, Typography } from '@mui/material';
+import { Grid, Paper, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+
 
 const Dashboard = () => {
   const [queues, setQueues] = useState([]);
