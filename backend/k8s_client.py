@@ -29,7 +29,7 @@ def get_queues():
         print(f"Error fetching queues: {e.status} {e.reason} - {e.body}")
         return {"error": e.body}
 
-def get_workloads(namespace: str = "default"):
+def get_workloads():
     try:
         workloads = k8s_api.list_namespaced_custom_object(
             group="kueue.x-k8s.io",
