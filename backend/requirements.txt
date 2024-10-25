@@ -3,5 +3,5 @@ uvicorn
 kubernetes
 fastapi-cors
 websockets
-
+uvicorn[standard]
 
