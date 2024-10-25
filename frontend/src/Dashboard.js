@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Grid, Paper, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
@@ -11,19 +10,25 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const processWorkloadData = (data) => {
+    setQueues(data.queues.items || []);
+    setWorkloads(data.workloads.items || []);
+
+    // Check for preempted workloads and trigger a notification
+    data.workloads.items.forEach(workload => {
+      if (workload.preemption?.preempted) {
+        toast.error(`Workload ${workload.metadata.name} was preempted: ${workload.preemption.reason}`);
+      }
+    });
+  };
+
   useEffect(() => {
+    // Initial data fetch with Axios as a fallback if WebSocket is not supported
     const fetchData = async () => {
       try {
-        console.error("REACT_APP_BACKEND_URL:", `${process.env.REACT_APP_BACKEND_URL}`);
+        // const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/kueue/status`);
         const response = await axios.get('http://backend-kueue-viz.apps.rosa.akram.s25d.p3.openshiftapps.com/kueue/status');
-        setQueues(response.data.queues.items || []);
-        setWorkloads(response.data.workloads.items || []);
-        // Check for preempted workloads and trigger a notification
-        response.data.workloads.items.forEach(workload => {
-          if (workload.preemption?.preempted) {
-            toast.error(`Workload ${workload.metadata.name} was preempted: ${workload.preemption.reason}`);
-          }
-        });
+        processWorkloadData(response.data);
       } catch (error) {
         setError('Failed to fetch data');
         console.error("Error fetching data:", error);
@@ -31,7 +36,35 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
+
     fetchData();
+
+    // Set up WebSocket connection for real-time updates
+    const ws = new WebSocket(`http://backend-kueue-viz.apps.rosa.akram.s25d.p3.openshiftapps.com/ws/kueue`);
+
+    ws.onopen = () => {
+      console.log("Connected to WebSocket");
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      processWorkloadData(data);
+    };
+
+    ws.onerror = (err) => {
+      console.error("WebSocket error:", err);
+      setError("WebSocket connection error");
+      ws.close();
+    };
+
+    ws.onclose = () => {
+      console.log("WebSocket connection closed");
+    };
+
+    // Clean up WebSocket connection on component unmount
+    return () => {
+      ws.close();
+    };
   }, []);
 
   if (loading) return <Typography variant="h6">Loading...</Typography>;
@@ -74,6 +107,7 @@ const Dashboard = () => {
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
+              <TableCell>Queue Name</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Preempted</TableCell>
               <TableCell>Preemption Reason</TableCell>
@@ -83,6 +117,7 @@ const Dashboard = () => {
             {workloads.map(workload => (
               <TableRow key={workload.metadata.name}>
                 <TableCell>{workload.metadata.name}</TableCell>
+                <TableCell>{workload.spec.queueName}</TableCell>
                 <TableCell>{workload.status?.state || "Unknown"}</TableCell>
                 <TableCell>{workload.preemption?.preempted ? "Yes" : "No"}</TableCell>
                 <TableCell>{workload.preemption?.reason || "N/A"}</TableCell>
