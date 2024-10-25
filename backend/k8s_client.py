@@ -29,7 +29,7 @@ def get_queues():
         print(f"Error fetching queues: {e.status} {e.reason} - {e.body}")
         return {"error": e.body}
 
-def get_workloads():
+def get_workloads(namespace: str = "default"):
     try:
         workloads = k8s_api.list_namespaced_custom_object(
             group="kueue.x-k8s.io",
@@ -37,10 +37,22 @@ def get_workloads():
             namespace=namespace,
             plural="workloads"
         )
+
+        # Check if workloads are preempted and add preemption status/reason to each workload
+        for workload in workloads['items']:
+            preempted = workload.get('status', {}).get('preempted', False)
+            preemption_reason = workload.get('status', {}).get('preemptionReason', 'None')
+
+            workload['preemption'] = {
+                'preempted': preempted,
+                'reason': preemption_reason
+            }
+
         return workloads
     except client.ApiException as e:
         print(f"Error fetching workloads: {e.status} {e.reason} - {e.body}")
         return {"error": e.body}
+
 
 
 def get_queue_status(namespace: str = "default"):
