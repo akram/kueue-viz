@@ -1,0 +1,16 @@
+{
+  "name": "kueue-viz-service",
+  "version": "1.0.0",
+  "description": "Node.js service layer for Kueue visualization",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@kubernetes/client-node": "^0.17.0",
+    "express": "^4.17.1"
+  },
+  "author": "Your Name",
+  "license": "MIT"
+}
+
