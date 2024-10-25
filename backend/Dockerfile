@@ -9,6 +9,8 @@ COPY . /app
 
 # Install the required dependencies
 RUN pip install --no-cache-dir fastapi uvicorn kubernetes
+RUN pip install --no-cache-dir -r requirements.txt
+
 
 # Expose port for FastAPI (defaults to 8000)
 EXPOSE 8000
