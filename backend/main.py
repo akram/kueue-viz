@@ -2,8 +2,8 @@ import os
 import asyncio
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
-from typing import Optional, Dict, Any
-from k8s_client import get_queues, get_workloads
+from typing import Optional, Dict, Any, List
+from k8s_client import get_queues, get_workloads, get_local_queues, get_cluster_queues
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Kueue Visualization API", version="1.0")
@@ -24,6 +24,16 @@ class KueueStatusResponse(BaseModel):
     workloads: Optional[Dict[str, Any]] = None
     error: Optional[str] = None
 
+class LocalQueue(BaseModel):
+    name: str
+    status: str
+    # Add more fields as required
+
+class ClusterQueue(BaseModel):
+    name: str
+    flavor: str
+    # Add more fields as required
+
 @app.get("/kueue/status", response_model=KueueStatusResponse)
 async def get_kueue_status():
     """
@@ -38,6 +48,21 @@ async def get_kueue_status():
         return {"error": error_message}
 
     return {"queues": queues, "workloads": workloads}
+
+
+@app.get("/local-queues", response_model=List[LocalQueue])
+async def get_local_queues_endpoint():
+    """
+    Fetches details about local queues.
+    """
+    return get_local_queues()  # Calls the function defined in k8s_client
+
+@app.get("/cluster-queues", response_model=List[ClusterQueue])
+async def get_cluster_queues_endpoint():
+    """
+    Fetches details about cluster queues and their flavors.
+    """
+    return get_cluster_queues()  # Calls the function defined in k8s_client
 
 
 # WebSocket setup

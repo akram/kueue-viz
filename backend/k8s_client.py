@@ -16,6 +16,56 @@ def get_namespace():
 
 namespace = get_namespace()
 
+def get_local_queues():
+    """
+    Retrieves local queues within a specific namespace.
+    """
+    try:
+        # Assuming 'localqueues' is the plural name for the local queue custom resources
+        local_queues = k8s_api.list_namespaced_custom_object(
+            group="kueue.x-k8s.io",
+            version="v1beta1",
+            namespace=namespace,
+            plural="localqueues"
+        )
+        return [
+            {
+                "name": item["metadata"]["name"],
+                "status": item.get("status", {}).get("state", "Unknown"),
+                # Add more fields as required
+            }
+            for item in local_queues.get("items", [])
+        ]
+    except client.ApiException as e:
+        print(f"Error fetching local queues: {e}")
+        return []
+
+def get_cluster_queues():
+    """
+    Retrieves cluster queues and their flavors across the cluster.
+    """
+    try:
+        # Assuming 'clusterqueues' is the plural name for the cluster queue custom resources
+        cluster_queues = k8s_api.list_cluster_custom_object(
+            group="kueue.x-k8s.io",
+            version="v1beta1",
+            plural="clusterqueues"
+        )
+        return [
+            {
+                "name": item["metadata"]["name"],
+                "flavor": item.get("spec", {}).get("flavor", "Default"),
+                # Add more fields as required
+            }
+            for item in cluster_queues.get("items", [])
+        ]
+    except client.ApiException as e:
+        print(f"Error fetching cluster queues: {e}")
+        return []
+
+
+
+
 def get_queues():
     try:
         queues = k8s_api.list_namespaced_custom_object(
