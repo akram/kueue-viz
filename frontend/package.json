@@ -39,45 +39,4 @@
   "author": "Your Name",
   "license": "MIT"
 }
-{
-  "name": "kueue-viz-frontend",
-  "version": "1.0.0",
-  "private": true,
-  "description": "Frontend dashboard for visualizing Kueue status",
-  "main": "src/index.js",
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
-  },
-  "dependencies": {
-    "axios": "^0.27.2",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "react-scripts": "^5.0.0",
-    "react-chartjs-2": "^4.0.0",
-    "chart.js": "^3.5.0",
-    "@mui/material": "^5.0.0",
-    "@emotion/react": "^11.0.0",
-    "@emotion/styled": "^11.0.0",
-    "react-toastify": "^9.1.1",
-    "react-router-dom": "^6.0.0"  // Added react-router-dom for routing support
-  },
-  "devDependencies": {},
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "author": "Your Name",
-  "license": "MIT"
-}
-:
+
