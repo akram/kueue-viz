@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Dashboard from './Dashboard';
 import LocalQueues from './LocalQueues';
 import ClusterQueues from './ClusterQueues';
+import Navbar from './Navbar';
 
 const App = () => {
   return (
