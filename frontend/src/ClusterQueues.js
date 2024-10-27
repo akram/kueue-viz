@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import useWebSocket from './useWebSocket';
 
 const ClusterQueues = () => {
   // Initialize WebSocket connection
