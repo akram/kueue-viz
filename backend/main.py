@@ -65,63 +65,65 @@ async def get_cluster_queues_endpoint():
     return get_cluster_queues()  # Calls the function defined in k8s_client
 
 
-# WebSocket setup
+# Generic WebSocket setup
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: list[WebSocket] = []
+        self.active_connections: Dict[str, list[WebSocket]] = {}
 
-    async def connect(self, websocket: WebSocket):
+    async def connect(self, websocket: WebSocket, endpoint: str):
         await websocket.accept()
-        self.active_connections.append(websocket)
+        if endpoint not in self.active_connections:
+            self.active_connections[endpoint] = []
+        self.active_connections[endpoint].append(websocket)
 
-    def disconnect(self, websocket: WebSocket):
-        self.active_connections.remove(websocket)
+    def disconnect(self, websocket: WebSocket, endpoint: str):
+        if endpoint in self.active_connections:
+            self.active_connections[endpoint].remove(websocket)
 
-    async def broadcast(self, message: dict):
-        for connection in self.active_connections:
+    async def broadcast(self, message: dict, endpoint: str):
+        for connection in self.active_connections.get(endpoint, []):
             try:
                 await connection.send_json(message)
             except Exception as e:
-                print(f"Error sending message: {e}")
-                self.disconnect(connection)
+                print(f"Error sending message on {endpoint}: {e}")
+                self.disconnect(connection, endpoint)
 
 manager = ConnectionManager()
 
-@app.websocket("/ws/kueue")
-async def websocket_endpoint(websocket: WebSocket):
-    await manager.connect(websocket)
+async def websocket_handler(websocket: WebSocket, data_fetcher: Callable, endpoint: str, interval: int = 5):
+    """
+    Generic WebSocket handler to fetch data and broadcast updates.
+    
+    Parameters:
+    - websocket: WebSocket instance
+    - data_fetcher: Callable function to fetch data
+    - endpoint: Unique endpoint identifier for managing connections
+    - interval: Polling interval in seconds
+    """
+    await manager.connect(websocket, endpoint)
     try:
         while True:
             # Fetch data periodically and broadcast it
-            data = {
-                "queues": get_queues(),
-                "workloads": get_workloads()
-            }
-            await manager.broadcast(data)
-            await asyncio.sleep(5)  # Polling interval: 5 seconds
+            data = data_fetcher()
+            await manager.broadcast(data, endpoint)
+            await asyncio.sleep(interval)  # Polling interval
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
+        manager.disconnect(websocket, endpoint)
     except Exception as e:
-        print(f"Unhandled exception in WebSocket endpoint: {e}")
-        manager.disconnect(websocket)
+        print(f"Unhandled exception in WebSocket endpoint {endpoint}: {e}")
+        manager.disconnect(websocket, endpoint)
 
 
-# WebSocket setup for Local Queues
-local_queue_manager = ConnectionManager()
+@app.websocket("/ws/kueue")
+async def websocket_kueue(websocket: WebSocket):
+    await websocket_handler(websocket, lambda: {"queues": get_queues(), "workloads": get_workloads()}, "/ws/kueue")
+
 
 @app.websocket("/ws/local-queues")
 async def websocket_local_queues(websocket: WebSocket):
-    await local_queue_manager.connect(websocket)
-    try:
-        while True:
-            # Fetch local queue data periodically and broadcast it
-            local_queues_data = get_local_queues()
-            await local_queue_manager.broadcast(local_queues_data)
-            await asyncio.sleep(5)  # Polling interval for local queues
-    except WebSocketDisconnect:
-        local_queue_manager.disconnect(websocket)
-    except Exception as e:
-        print(f"Unhandled exception in Local Queues WebSocket: {e}")
-        local_queue_manager.disconnect(websocket)
+    await websocket_handler(websocket, get_local_queues, "/ws/local-queues")
 
-        
+
+@app.websocket("/ws/cluster-queues")
+async def websocket_cluster_queues(websocket: WebSocket):
+    await websocket_handler(websocket, get_cluster_queues, "/ws/cluster-queues")
