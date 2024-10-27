@@ -104,3 +104,24 @@ async def websocket_endpoint(websocket: WebSocket):
     except Exception as e:
         print(f"Unhandled exception in WebSocket endpoint: {e}")
         manager.disconnect(websocket)
+
+
+# WebSocket setup for Local Queues
+local_queue_manager = ConnectionManager()
+
+@app.websocket("/ws/local-queues")
+async def websocket_local_queues(websocket: WebSocket):
+    await local_queue_manager.connect(websocket)
+    try:
+        while True:
+            # Fetch local queue data periodically and broadcast it
+            local_queues_data = get_local_queues()
+            await local_queue_manager.broadcast(local_queues_data)
+            await asyncio.sleep(5)  # Polling interval for local queues
+    except WebSocketDisconnect:
+        local_queue_manager.disconnect(websocket)
+    except Exception as e:
+        print(f"Unhandled exception in Local Queues WebSocket: {e}")
+        local_queue_manager.disconnect(websocket)
+
+        
