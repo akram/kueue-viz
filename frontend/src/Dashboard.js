@@ -1,75 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React from 'react';
 import { Grid, Paper, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-import { toast, ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import useWebSocket from './useWebSocket';
 
 const Dashboard = () => {
-  const [queues, setQueues] = useState([]);
-  const [workloads, setWorkloads] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { data, error } = useWebSocket(`http://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/kueue`);
+  const queues = data.queues || [];
+  const workloads = data.workloads || [];
 
-  const processWorkloadData = (data) => {
-    setQueues(data.queues.items || []);
-    setWorkloads(data.workloads.items || []);
-
-    // Check for preempted workloads and trigger a notification
-    data.workloads.items.forEach(workload => {
-      if (workload.preemption?.preempted) {
-        toast.error(`Workload ${workload.metadata.name} was preempted: ${workload.preemption.reason}`);
-      }
-    });
-  };
-
-  useEffect(() => {
-    // Initial data fetch with Axios as a fallback if WebSocket is not supported
-    const fetchData = async () => {
-      try {
-        // const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/kueue/status`);
-        const response = await axios.get('http://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/kueue/status');
-        processWorkloadData(response.data);
-      } catch (error) {
-        setError('Failed to fetch data');
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-
-    // Set up WebSocket connection for real-time updates
-    const ws = new WebSocket(`http://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/kueue`);
-
-    ws.onopen = () => {
-      console.log("Connected to WebSocket");
-    };
-
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      processWorkloadData(data);
-    };
-
-    ws.onerror = (err) => {
-      console.error("WebSocket error:", err);
-      setError("WebSocket connection error");
-      ws.close();
-    };
-
-    ws.onclose = () => {
-      console.log("WebSocket connection closed");
-    };
-
-    // Clean up WebSocket connection on component unmount
-    return () => {
-      ws.close();
-    };
-  }, []);
-
-  if (loading) return <Typography variant="h6">Loading...</Typography>;
-  if (error) return <Typography variant="h6" color="error">{error}</Typography>;
-
+  // Display toast notifications for preempted workloads
+  workloads.forEach(workload => {
+    if (workload.preemption?.preempted) {
+      toast.error(`Workload ${workload.metadata.name} was preempted: ${workload.preemption.reason}`);
+    }
+  });
   return (
     <>
       <ToastContainer />
