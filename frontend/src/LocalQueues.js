@@ -9,7 +9,7 @@ const LocalQueues = () => {
   useEffect(() => {
     const fetchLocalQueues = async () => {
       try {
-        const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/local-queues`);
+        const response = await axios.get(`http://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/local-queues`);
         setLocalQueues(response.data);
       } catch (error) {
         setError('Failed to fetch local queues');
