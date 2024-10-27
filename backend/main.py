@@ -2,7 +2,7 @@ import os
 import asyncio
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Callable
 from k8s_client import get_queues, get_workloads, get_local_queues, get_cluster_queues
 from fastapi.middleware.cors import CORSMiddleware
 
