@@ -40,7 +40,7 @@ const Dashboard = () => {
     fetchData();
 
     // Set up WebSocket connection for real-time updates
-    const ws = new WebSocket(`http://backend-kueue-viz.apps.rosa.akram.s25d.p3.openshiftapps.com/ws/kueue`);
+    const ws = new WebSocket(`https://backend-kueue-viz.apps.rosa.akram.s25d.p3.openshiftapps.com/ws/kueue`);
 
     ws.onopen = () => {
       console.log("Connected to WebSocket");
