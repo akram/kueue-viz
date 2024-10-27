@@ -13,7 +13,7 @@ frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")  # Default to 
 # Allow CORS for the frontend origin
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[frontend_url, "http://frontend-kueue-viz.apps.rosa.akram.s25d.p3.openshiftapps.com"],
+    allow_origins=[frontend_url, "http://frontend-kueue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
