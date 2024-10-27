@@ -27,7 +27,7 @@ const Dashboard = () => {
     const fetchData = async () => {
       try {
         // const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/kueue/status`);
-        const response = await axios.get('https://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/kueue/status');
+        const response = await axios.get('http://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/kueue/status');
         processWorkloadData(response.data);
       } catch (error) {
         setError('Failed to fetch data');
@@ -40,7 +40,7 @@ const Dashboard = () => {
     fetchData();
 
     // Set up WebSocket connection for real-time updates
-    const ws = new WebSocket(`https://backend-kueue-viz.apps.rosa.akram.s25d.p3.openshiftapps.com/ws/kueue`);
+    const ws = new WebSocket(`http://backend-kueue-viz.apps.rosa.akram.s25d.p3.openshiftapps.com/ws/kueue`);
 
     ws.onopen = () => {
       console.log("Connected to WebSocket");
