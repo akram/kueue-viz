@@ -3,21 +3,15 @@ import axios from 'axios';
 import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 
 const ClusterQueues = () => {
-  const [clusterQueues, setClusterQueues] = useState([]);
-  const [error, setError] = useState(null);
+    // Initialize WebSocket connection
+    const { data: localQueues, error } = useWebSocket(`http://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/cluster-queues`);
 
-  useEffect(() => {
-    const fetchClusterQueues = async () => {
-      try {
-        const response = await axios.get(`http://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/cluster-queues`);
-        setClusterQueues(response.data);
-      } catch (error) {
-        setError('Failed to fetch cluster queues');
-        console.error("Error fetching cluster queues:", error);
+    // Display toast notifications if a specific condition is met
+    localQueues.forEach(queue => {
+      if (queue.status === "updated") {
+        toast.info(`Local queue ${queue.name} has been updated.`);
       }
-    };
-    fetchClusterQueues();
-  }, []);
+    });
 
   return (
     <div>
