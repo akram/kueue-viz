@@ -27,7 +27,7 @@ const Dashboard = () => {
     const fetchData = async () => {
       try {
         // const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/kueue/status`);
-        const response = await axios.get('http://backend-kueue-viz.apps.rosa.akram.s25d.p3.openshiftapps.com/kueue/status');
+        const response = await axios.get('https://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/kueue/status');
         processWorkloadData(response.data);
       } catch (error) {
         setError('Failed to fetch data');
