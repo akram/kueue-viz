@@ -1,9 +1,9 @@
+import { TableCell, Typography } from '@mui/material';
 import React from 'react';
-import { Typography, TableCell } from '@mui/material';
-import 'react-toastify/dist/ReactToastify.css';
 import { toast, ToastContainer } from 'react-toastify';
-import useWebSocket from './useWebSocket';
+import 'react-toastify/dist/ReactToastify.css';
 import DataTable from './DataTable';
+import useWebSocket from './useWebSocket';
 
 const LocalQueues = () => {
   // Initialize WebSocket connection

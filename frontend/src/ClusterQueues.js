@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-import useWebSocket from './useWebSocket';
+import { TableCell, Typography } from '@mui/material';
+import React from 'react';
+import { toast, ToastContainer } from 'react-toastify';
 import DataTable from './DataTable';
+import useWebSocket from './useWebSocket';
 
 const ClusterQueues = () => {
   // Initialize WebSocket connection
