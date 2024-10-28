@@ -8,9 +8,8 @@ import DataTable from './DataTable';
 const Dashboard = () => {
   const { data, error } = useWebSocket(`http://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/kueue`);
   const queues = data.queues || [];
-  const workloads = data.workloads || [];
   // Display toast notifications for preempted workloads
-  workloads.forEach(workload => {
+  data.workloads.forEach(workload => {
     if (workload.preemption?.preempted) {
       toast.error(`Workload ${workload.metadata.name} was preempted: ${workload.preemption.reason}`);
     }
