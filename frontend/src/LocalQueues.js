@@ -7,10 +7,10 @@ import useWebSocket from './useWebSocket';
 
 const LocalQueues = () => {
   // Initialize WebSocket connection
-  const { data: localQueues, error } = useWebSocket(`http://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/local-queues`);
+  const { data: data, error } = useWebSocket(`http://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/local-queues`);
 
   // Display toast notifications if a specific condition is met
-  localQueues.forEach(queue => {
+  data.localQueues.forEach(queue => {
     if (queue.status === "updated") {
       toast.info(`Local queue ${queue.name} has been updated.`);
     }
