@@ -15,7 +15,6 @@ const Dashboard = () => {
       toast.error(`Workload ${workload.metadata.name} was preempted: ${workload.preemption.reason}`);
     }
   });
-  if (loading) return <Typography variant="h6">Loading...</Typography>;
   if (error) return <Typography variant="h6" color="error">{error}</Typography>;
 
   return (
