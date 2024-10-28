@@ -7,7 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 const Dashboard = () => {
   const [queues, setQueues] = useState([]);
   const [workloads, setWorkloads] = useState([]);
-  const [workloadCount, setWorkloadCount] = useState(0);
+  const [workloadCount, setWorkloadCount] = useState(workloads?.length);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
