@@ -109,7 +109,6 @@ const Dashboard = () => {
               <TableCell>Name</TableCell>
               <TableCell>Queue Name</TableCell>
               <TableCell>Status</TableCell>
-              <TableCell>Admitted</TableCell>
               <TableCell>Preempted</TableCell>
               <TableCell>Preemption Reason</TableCell>
               <TableCell>Priority</TableCell>
@@ -121,6 +120,7 @@ const Dashboard = () => {
               <TableRow key={workload.metadata.name}>
                 <TableCell>{workload.metadata.name}</TableCell>
                 <TableCell>{workload.spec.queueName}</TableCell>
+                <TableCell>{workload.status?.state || "Unknown"}</TableCell>
                 <TableCell>{workload.status?.state || "Unknown"}</TableCell>
                 <TableCell>{workload.preemption?.preempted ? "Yes" : "No"}</TableCell>
                 <TableCell>{workload.preemption?.reason || "N/A"}</TableCell>
