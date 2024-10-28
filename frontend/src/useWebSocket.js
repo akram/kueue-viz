@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
 const useWebSocket = (url) => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState({ queues: [], workloads: [] });  // Default to empty arrays for both queues and workloads
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -13,8 +13,18 @@ const useWebSocket = (url) => {
     };
 
     ws.onmessage = (event) => {
-      const receivedData = JSON.parse(event.data);
-      setData(receivedData);
+      try {
+        const receivedData = JSON.parse(event.data);
+        
+        // Ensure received data has the expected structure
+        setData({
+          queues: Array.isArray(receivedData.queues) ? receivedData.queues : [],
+          workloads: Array.isArray(receivedData.workloads) ? receivedData.workloads : []
+        });
+      } catch (e) {
+        console.error("Failed to parse WebSocket message:", e);
+        setError("Error parsing data from WebSocket");
+      }
     };
 
     ws.onerror = (err) => {
@@ -37,5 +47,3 @@ const useWebSocket = (url) => {
 };
 
 export default useWebSocket;
-
-
