@@ -7,7 +7,7 @@ import useWebSocket from './useWebSocket';
 
 const LocalQueues = () => {
   // Initialize WebSocket connection
-  const { data: data, error } = useWebSocket(`http://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/local-queues`);
+  const { data, error } = useWebSocket(`http://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/local-queues`);
 
   // Display toast notifications if a specific condition is met
   data.localQueues.forEach(queue => {

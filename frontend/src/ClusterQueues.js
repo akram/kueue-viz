@@ -6,8 +6,9 @@ import useWebSocket from './useWebSocket';
 
 const ClusterQueues = () => {
   // Initialize WebSocket connection
-  const { data: clusterQueues, error } = useWebSocket(`http://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/cluster-queues`);
+  const { data, error } = useWebSocket(`http://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/cluster-queues`);
   // Display toast notifications if a specific condition is met
+  const clusterQueues = data.clusterQueues;
   clusterQueues.forEach(queue => {
     if (queue.flavor === "new") {
       toast.info(`Cluster queue ${queue.name} has a new flavor.`);
