@@ -7,6 +7,7 @@ const Navbar = () => {
     <AppBar position="static">
       <Toolbar>
         <Button color="inherit" component={Link} to="/">Dashboard</Button>
+        <Button color="inherit" component={Link} to="/workloads">Workloads</Button>
         <Button color="inherit" component={Link} to="/local-queues">Local Queues</Button>
         <Button color="inherit" component={Link} to="/cluster-queues">Cluster Queues</Button>
       </Toolbar>
