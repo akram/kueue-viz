@@ -7,7 +7,7 @@ import useWebSocket from './useWebSocket';
 
 const ClusterQueues = () => {
     // Initialize WebSocket connection
-    const { data: clusterQueues, error } = useWebSocket(`http://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/cluster-queues`);
+    const { data: clusterQueues, error } = useWebSocket(`http://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/kueue`);
 
     // Display toast notifications if a specific condition is met
     clusterQueues.forEach(queue => {

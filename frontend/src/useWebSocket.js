@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
 
 const useWebSocket = (url) => {
   const [data, setData] = useState([]);
