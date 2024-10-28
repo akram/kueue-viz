@@ -118,11 +118,13 @@ async def websocket_handler(websocket: WebSocket, data_fetcher: Callable, endpoi
 async def websocket_kueue(websocket: WebSocket):
     await websocket_handler(websocket, lambda: {"queues": get_queues(), "clusterQueues": get_cluster_queues(), "workloads": get_workloads()}, "/ws/kueue")
 
+@app.websocket("/ws/workloads")
+async def websocket_kueue(websocket: WebSocket):
+    await websocket_handler(websocket,  get_workloads()}, "/ws/workloads")
 
 @app.websocket("/ws/local-queues")
 async def websocket_local_queues(websocket: WebSocket):
     await websocket_handler(websocket, get_local_queues, "/ws/local-queues")
-
 
 @app.websocket("/ws/cluster-queues")
 async def websocket_cluster_queues(websocket: WebSocket):
