@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import 'react-toastify/dist/ReactToastify.css';
 import { toast, ToastContainer } from 'react-toastify';
+import useWebSocket from './useWebSocket';
 
 const LocalQueues = () => {
     // Initialize WebSocket connection
