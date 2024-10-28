@@ -3,6 +3,7 @@ import { Grid, Paper, Typography, Table, TableBody, TableCell, TableContainer, T
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import useWebSocket from './useWebSocket';
+import DataTable from './DataTable';
 
 const Dashboard = () => {
   const { data, error } = useWebSocket(`http://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/kueue`);
