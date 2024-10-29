@@ -6,6 +6,7 @@ import ClusterQueues from './ClusterQueues';
 import ResourceFlavors from './ResourceFlavors';
 import ResourceFlavorDetail from './ResourceFlavorDetail';
 import Workloads from './Workloads';
+import WorkloadDetail from './WorkloadDetail';
 
 import Navbar from './Navbar';
 
@@ -19,6 +20,10 @@ const App = () => {
         <Route path="/local-queues" element={<LocalQueues />} />
         <Route path="/cluster-queues" element={<ClusterQueues />} />
         <Route path="/resource-flavors" element={<ResourceFlavors />} />
+
+        <Route path="/workload/:workloadName" element={<WorkloadDetail />} />
+        <Route path="/local-queue/:queueName" element={<WorkloadDetail />} />
+        <Route path="/cluster-queue/:clusterQueueName" element={<WorkloadDetail />} />
         <Route path="/resource-flavor/:flavorName" element={<ResourceFlavorDetail />} />
       </Routes>
     </Router>
