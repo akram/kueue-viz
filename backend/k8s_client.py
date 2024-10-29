@@ -197,12 +197,18 @@ def get_resource_flavors():
         print(f"Error fetching resource flavors: {e}")
         return []
 
+from kubernetes import client, config
+
+# Load Kubernetes configuration for in-cluster access
+config.load_incluster_config()
+k8s_api = client.CustomObjectsApi()
+
 def get_resource_flavor_details(flavor_name: str):
     """
     Retrieves details of a specific resource flavor, including queues using it.
     """
     try:
-        # Get the specified resource flavor details
+        # Fetch the specified resource flavor details
         flavor = k8s_api.get_cluster_custom_object(
             group="kueue.x-k8s.io",
             version="v1beta1",
@@ -210,37 +216,43 @@ def get_resource_flavor_details(flavor_name: str):
             name=flavor_name
         )
         
-        # List all cluster queues to find the ones that use this flavor
-        cluster_queues = get_cluster_queues()
+        # List all cluster queues to find which ones use this flavor
+        cluster_queues = k8s_api.list_cluster_custom_object(
+            group="kueue.x-k8s.io",
+            version="v1beta1",
+            plural="clusterqueues"
+        )
 
-        # Find queues that use the specified flavor
         queues_using_flavor = []
-        print(f"Searching for queues using {flavor_name}")
-        
-        for queue in cluster_queues:
-            print(f"Checking queue: {queue['name']}")
-            for flavor in queue.get("flavors", []):
-                print(f"Checking flavor: {flavor}")
-                if flavor.get("name") == flavor_name:
-                    # Collect quota information
-                    quota_info = [
-                        {
-                            "resource": resource.get("name"),
-                            "nominalQuota": resource.get("nominalQuota")
-                        }
-                        for resource in flavor.get("resources", [])
-                    ]
-                    queues_using_flavor.append({
-                        "queueName": queue["metadata"]["name"],
-                        "quota": quota_info
-                    })
-                    print(f"Added queue {queue['metadata']['name']} using flavor {flavor_name}")
-                    break  # Stop searching if the flavor is already found in this queue
+
+        # Iterate through each cluster queue to see if it uses the specified flavor
+        for queue in cluster_queues.get("items", []):
+            queue_name = queue.get("metadata", {}).get("name", "Unnamed Queue")
+            resource_groups = queue.get("spec", {}).get("resourceGroups", [])
+            
+            for resource_group in resource_groups:
+                for flavor in resource_group.get("flavors", []):
+                    if flavor.get("name") == flavor_name:
+                        # Collect resource and quota information for this queue
+                        quota_info = [
+                            {
+                                "resource": resource.get("name", "Unknown Resource"),
+                                "nominalQuota": resource.get("nominalQuota", "N/A")
+                            }
+                            for resource in flavor.get("resources", [])
+                        ]
+                        queues_using_flavor.append({
+                            "queueName": queue_name,
+                            "quota": quota_info
+                        })
+                        break  # Stop searching once the flavor is found in this queue
+
         return {
-            "name": flavor["metadata"]["name"],
+            "name": flavor.get("metadata", {}).get("name", "Unknown Flavor"),
             "details": flavor.get("spec", {}),
             "queues": queues_using_flavor
         }
+
     except client.ApiException as e:
         print(f"Error fetching resource flavor details for {flavor_name}: {e}")
         return None

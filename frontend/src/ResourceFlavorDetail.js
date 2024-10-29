@@ -31,7 +31,7 @@ const ResourceFlavorDetail = () => {
   return (
     <Paper style={{ padding: '16px', marginTop: '20px' }}>
       <Typography variant="h4" gutterBottom>Resource Flavor Detail: {flavorName}</Typography>
-      <Typography variant="body1"><strong>Details:</strong> {JSON.stringify(flavor.details)}</Typography>
+      <Typography variant="body1"><strong>Details:</strong> {JSON.stringify(flavor.details, null, 2)}</Typography>
 
       <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>
         Queues Using This Flavor
