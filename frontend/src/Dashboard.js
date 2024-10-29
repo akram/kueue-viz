@@ -8,12 +8,14 @@ import 'react-toastify/dist/ReactToastify.css';
 const Dashboard = () => {
   const [queues, setQueues] = useState([]);
   const [workloads, setWorkloads] = useState([]);
+  const [flavors, setFlavors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const processWorkloadData = (data) => {
     setQueues(data.queues.items || []);
     setWorkloads(data.workloads.items || []);
+    setFlavors(data.flavors.items || []);
 
     // Check for preempted workloads and trigger a notification
     data.workloads.items.forEach(workload => {
