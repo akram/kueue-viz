@@ -65,9 +65,6 @@ def get_cluster_queues():
         print(f"Error fetching cluster queues: {e}")
         return []
 
-
-
-
 def get_queues():
     try:
         queues = k8s_api.list_namespaced_custom_object(
@@ -142,7 +139,7 @@ def get_events_by_workload_name(workload_name: str):
                 "name": event.metadata.name,
                 "reason": event.reason,
                 "message": event.message,
-                "timestamp": event.last_timestamp,
+                "timestamp": event.last_timestamp.isoformat() if event.last_timestamp else None,
                 "type": event.type,
             }
             for event in events.items
@@ -150,11 +147,6 @@ def get_events_by_workload_name(workload_name: str):
     except client.ApiException as e:
         print(f"Error fetching events for workload {workload_name}: {e}")
         return []
-
-
-
-
-
 
 def get_queue_status(namespace: str = "default"):
     """
