@@ -7,12 +7,11 @@ const ClusterQueueDetail = () => {
   const { clusterQueueName } = useParams();
   const url = `ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/cluster-queue/${clusterQueueName}`;
   const { data: clusterQueueData, error } = useWebSocket(url);
-
   const [clusterQueue, setClusterQueue] = useState(null);
 
   useEffect(() => {
-    if (clusterQueueData && clusterQueueData.name) {
-      console.log("Received clusterQueue data:", clusterQueueData); // Debug line
+    console.log("Received clusterQueue data:", clusterQueueData); // Debug line
+    if (clusterQueueData ) {
       setClusterQueue(clusterQueueData);
     }
   }, [clusterQueueData]);
@@ -20,6 +19,7 @@ const ClusterQueueDetail = () => {
   if (error) return <Typography color="error">{error}</Typography>;
 
   if (!clusterQueue) {
+    console.log("Received empty clusterQueue data:", clusterQueueData); // Debug line
     return (
       <Paper style={{ padding: '16px', marginTop: '20px' }}>
         <Typography variant="h6">Loading...</Typography>

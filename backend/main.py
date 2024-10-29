@@ -143,6 +143,12 @@ async def websocket_local_queues(websocket: WebSocket):
 async def websocket_cluster_queues(websocket: WebSocket):
     await websocket_handler(websocket, get_cluster_queues, "/ws/cluster-queues")
 
+@app.websocket("/ws/cluster-queue/{cluster_queue_name}")
+async def websocket_resource_flavor_details(websocket: WebSocket, cluster_queue_name: str):
+    await websocket_handler(websocket, lambda: get_cluster_queue_details(cluster_queue_name), f"/ws/cluster-queue/{cluster_queue_name}")
+
+
+
 # New WebSocket endpoint for individual workload updates
 @app.websocket("/ws/workload/{workload_name}")
 async def websocket_workload(websocket: WebSocket, workload_name: str):
@@ -177,8 +183,4 @@ async def websocket_local_queue_details(websocket: WebSocket, queue_name: str):
 @app.websocket("/ws/local-queue/{queue_name}/workloads")
 async def websocket_local_queue_workloads(websocket: WebSocket, queue_name: str):
     await websocket_handler(websocket, lambda: get_admitted_workloads(queue_name), f"/ws/local-queue/{queue_name}/workloads")
-
-@app.websocket("/ws/cluster-queue/{cluster_queue_name}")
-async def websocket_resource_flavor_details(websocket: WebSocket, cluster_queue_name: str):
-    await websocket_handler(websocket, lambda: get_cluster_queue_details(cluster_queue_name), f"/ws/cluster-queue/{cluster_queue_name}")
 
