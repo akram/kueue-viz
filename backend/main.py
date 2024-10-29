@@ -147,5 +147,16 @@ async def websocket_cluster_queues(websocket: WebSocket):
 async def websocket_workload(websocket: WebSocket, workload_name: str):
     await websocket_handler(websocket, lambda: get_workload_by_name(workload_name), f"/ws/workload/{workload_name}")
 
-
-    
+@app.websocket("/ws/workload/{workload_name}/events")
+async def websocket_workload_events(websocket: WebSocket, workload_name: str):
+    await manager.connect(websocket, f"/ws/workload/{workload_name}/events")
+    try:
+        while True:
+            events = get_events_by_workload_name(workload_name)
+            await manager.broadcast(events, f"/ws/workload/{workload_name}/events")
+            await asyncio.sleep(5)  # Polling interval for new events
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, f"/ws/workload/{workload_name}/events")
+    except Exception as e:
+        print(f"Unhandled exception in WebSocket events endpoint for {workload_name}: {e}")
+        manager.disconnect(websocket, f"/ws/workload/{workload_name}/events")
