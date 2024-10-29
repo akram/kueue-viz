@@ -22,7 +22,7 @@ const Workloads = () => {
   return (
     <>
       <Typography variant="h5" gutterBottom>All Workloads</Typography>
-      <WorkloadsList workloads={workloads} />
+      <WorkloadsList workloads={workloads.items} />
     </>
   );
 };
