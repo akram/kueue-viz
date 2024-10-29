@@ -9,7 +9,7 @@ const Workloads = () => {
 
   useEffect(() => {
     if (items && Array.isArray(items)) {
-      setWorkloads(items);
+      setWorkloads(data.workloads.items || []);
     }
   }, [items]);
 
