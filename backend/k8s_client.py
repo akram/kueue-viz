@@ -6,6 +6,16 @@ config.load_incluster_config()
 k8s_api = client.CustomObjectsApi()
 core_api = client.CoreV1Api()
 
+__all__ = [
+    "get_queues",
+    "get_workloads",
+    "get_local_queues",
+    "get_cluster_queues",
+    "get_workload_by_name",
+    "get_events_by_workload_name",
+    "get_resource_flavors",
+    "get_resource_flavor_details"
+]
 
 # Determine the namespace dynamically from the mounted file
 def get_namespace():
@@ -160,5 +170,60 @@ def get_queue_status(namespace: str = "default"):
         "queues": get_queues(namespace),
         "workloads": get_workloads(namespace)
     }
+
+def get_resource_flavors():
+    """
+    Retrieves all resource flavors.
+    """
+    try:
+        flavors = k8s_api.list_cluster_custom_object(
+            group="kueue.x-k8s.io",
+            version="v1beta1",
+            plural="resourceflavors"
+        )
+        return [
+            {
+                "name": item["metadata"]["name"],
+                "details": item.get("spec", {}),
+            }
+            for item in flavors.get("items", [])
+        ]
+    except client.ApiException as e:
+        print(f"Error fetching resource flavors: {e}")
+        return []
+
+def get_resource_flavor_details(flavor_name: str):
+    """
+    Retrieves details of a specific resource flavor, including queues using it.
+    """
+    try:
+        flavor = k8s_api.get_cluster_custom_object(
+            group="kueue.x-k8s.io",
+            version="v1beta1",
+            plural="resourceflavors",
+            name=flavor_name
+        )
+        # Find queues that use this flavor
+        queues = k8s_api.list_cluster_custom_object(
+            group="kueue.x-k8s.io",
+            version="v1beta1",
+            plural="clusterqueues"
+        )
+        queues_using_flavor = [
+            {
+                "queueName": queue["metadata"]["name"],
+                "quota": queue.get("spec", {}).get("quota", {})
+            }
+            for queue in queues.get("items", [])
+            if any(resource["flavor"] == flavor_name for resource in queue.get("spec", {}).get("resources", []))
+        ]
+        return {
+            "name": flavor["metadata"]["name"],
+            "details": flavor.get("spec", {}),
+            "queues": queues_using_flavor
+        }
+    except client.ApiException as e:
+        print(f"Error fetching resource flavor details for {flavor_name}: {e}")
+        return None
 
 

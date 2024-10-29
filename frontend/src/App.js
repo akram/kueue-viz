@@ -3,7 +3,8 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Dashboard from './Dashboard';
 import LocalQueues from './LocalQueues';
 import ClusterQueues from './ClusterQueues';
-import WorkloadDetail from './WorkloadDetail';
+import ResourceFlavors from './ResourceFlavors';
+import ResourceFlavorDetail from './ResourceFlavorDetail';
 import Navbar from './Navbar';
 
 const App = () => {
@@ -14,7 +15,8 @@ const App = () => {
         <Route path="/" element={<Dashboard />} />
         <Route path="/local-queues" element={<LocalQueues />} />
         <Route path="/cluster-queues" element={<ClusterQueues />} />
-        <Route path="/workload/:workloadName" element={<WorkloadDetail />} /> {/* New route for workload details */}
+        <Route path="/resource-flavors" element={<ResourceFlavors />} />
+        <Route path="/resource-flavor/:flavorName" element={<ResourceFlavorDetail />} />
       </Routes>
     </Router>
   );

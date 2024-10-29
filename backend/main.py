@@ -3,7 +3,7 @@ import asyncio
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, List, Callable
-from k8s_client import get_queues, get_workloads, get_local_queues, get_cluster_queues, get_workload_by_name,get_events_by_workload_name
+from k8s_client import *
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Kueue Visualization API", version="1.0")
@@ -160,3 +160,14 @@ async def websocket_workload_events(websocket: WebSocket, workload_name: str):
     except Exception as e:
         print(f"Unhandled exception in WebSocket events endpoint for {workload_name}: {e}")
         manager.disconnect(websocket, f"/ws/workload/{workload_name}/events")
+
+
+@app.websocket("/ws/resource-flavors")
+async def websocket_resource_flavors(websocket: WebSocket):
+    await websocket_handler(websocket, get_resource_flavors, "/ws/resource-flavors")
+
+@app.websocket("/ws/resource-flavor/{flavor_name}")
+async def websocket_resource_flavor_details(websocket: WebSocket, flavor_name: str):
+    await websocket_handler(websocket, lambda: get_resource_flavor_details(flavor_name), f"/ws/resource-flavor/{flavor_name}")
+
+
