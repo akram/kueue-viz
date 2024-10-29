@@ -16,7 +16,8 @@ __all__ = [
     "get_resource_flavors",
     "get_resource_flavor_details",
     "get_admitted_workloads",
-    "get_local_queue_details"
+    "get_local_queue_details",
+    "get_cluster_queue_details"
 ]
 
 # Determine the namespace dynamically from the mounted file
@@ -318,4 +319,38 @@ def get_admitted_workloads(queue_name: str):
     except client.ApiException as e:
         print(f"Error fetching admitted workloads for LocalQueue {queue_name}: {e}")
         return {"error": f"Could not retrieve admitted workloads for LocalQueue {queue_name}"}
+
+
+def get_cluster_queue_details(cluster_queue_name: str):
+    """
+    Retrieves details of a specific cluster queue, including resources and nominal quotas.
+    """
+    try:
+        # Fetch the specific cluster queue
+        cluster_queue = k8s_api.get_cluster_custom_object(
+            group="kueue.x-k8s.io",
+            version="v1beta1",
+            plural="clusterqueues",
+            name=cluster_queue_name
+        )
+
+        # Extract queues and their quotas
+        queues_using_cluster_queue = []
+        for resource in cluster_queue.get("spec", {}).get("resources", []):
+            queue_name = resource.get("name")
+            quota = resource.get("quota", [])
+            queues_using_cluster_queue.append({
+                "queueName": queue_name,
+                "quota": [{"resource": q["resource"], "nominalQuota": q["nominalQuota"]} for q in quota]
+            })
+
+        return {
+            "name": cluster_queue["metadata"]["name"],
+            "details": cluster_queue.get("spec", {}),
+            "queues": queues_using_cluster_queue
+        }
+
+    except client.ApiException as e:
+        print(f"Error fetching details for cluster queue {cluster_queue_name}: {e}")
+        return None
 

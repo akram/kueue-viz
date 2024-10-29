@@ -8,12 +8,12 @@ const ClusterQueueDetail = () => {
   const url = `ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/cluster-queue/${clusterQueueName}`;
   const { data: clusterQueueData, error } = useWebSocket(url);
 
-  const [clusterQueue, setFlavor] = useState(null);
+  const [clusterQueue, setClusterQueue] = useState(null);
 
   useEffect(() => {
     if (clusterQueueData && clusterQueueData.name) {
       console.log("Received clusterQueue data:", clusterQueueData); // Debug line
-      setFlavor(clusterQueueData);
+      setClusterQueue(clusterQueueData);
     }
   }, [clusterQueueData]);
 

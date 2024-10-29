@@ -162,7 +162,6 @@ async def websocket_workload_events(websocket: WebSocket, workload_name: str):
         print(f"Unhandled exception in WebSocket events endpoint for {workload_name}: {e}")
         manager.disconnect(websocket, f"/ws/workload/{workload_name}/events")
 
-
 @app.websocket("/ws/resource-flavors")
 async def websocket_resource_flavors(websocket: WebSocket):
     await websocket_handler(websocket, get_resource_flavors, "/ws/resource-flavors")
@@ -170,7 +169,6 @@ async def websocket_resource_flavors(websocket: WebSocket):
 @app.websocket("/ws/resource-flavor/{flavor_name}")
 async def websocket_resource_flavor_details(websocket: WebSocket, flavor_name: str):
     await websocket_handler(websocket, lambda: get_resource_flavor_details(flavor_name), f"/ws/resource-flavor/{flavor_name}")
-
 
 @app.websocket("/ws/local-queue/{queue_name}")
 async def websocket_local_queue_details(websocket: WebSocket, queue_name: str):
@@ -180,4 +178,7 @@ async def websocket_local_queue_details(websocket: WebSocket, queue_name: str):
 async def websocket_local_queue_workloads(websocket: WebSocket, queue_name: str):
     await websocket_handler(websocket, lambda: get_admitted_workloads(queue_name), f"/ws/local-queue/{queue_name}/workloads")
 
+@app.websocket("/ws/cluster-queue/{cluster_queue_name}")
+async def websocket_resource_flavor_details(websocket: WebSocket, cluster_queue_name: str):
+    await websocket_handler(websocket, lambda: get_cluster_queue_details(cluster_queue_name), f"/ws/cluster-queue/{cluster_queue_name}")
 
