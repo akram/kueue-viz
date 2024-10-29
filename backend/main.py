@@ -3,7 +3,7 @@ import asyncio
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, List, Callable
-from k8s_client import get_queues, get_workloads, get_local_queues, get_cluster_queues
+from k8s_client import get_queues, get_workloads, get_local_queues, get_cluster_queues, get_workload_by_name
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Kueue Visualization API", version="1.0")
