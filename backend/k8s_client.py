@@ -218,27 +218,24 @@ def get_resource_flavor_details(flavor_name: str):
         print(f"Searching for queues using {flavor_name}")
         
         for queue in cluster_queues:
-            print(f"Checking queue: {queue['metadata']['name']}")
-            for resource_group in queue.get("spec", {}).get("resourceGroups", []):
-                print(f"Resource group found: {resource_group}")
-                for flavor in resource_group.get("flavors", []):
-                    print(f"Checking flavor: {flavor}")
-                    if flavor.get("name") == flavor_name:
-                        # Collect quota information
-                        quota_info = [
-                            {
-                                "resource": resource.get("name"),
-                                "nominalQuota": resource.get("nominalQuota")
-                            }
-                            for resource in flavor.get("resources", [])
-                        ]
-                        queues_using_flavor.append({
-                            "queueName": queue["metadata"]["name"],
-                            "quota": quota_info
-                        })
-                        print(f"Added queue {queue['metadata']['name']} using flavor {flavor_name}")
-                        break  # Stop searching if the flavor is already found in this queue
-
+            print(f"Checking queue: {queue['name']}")
+            for flavor in queue.get("flavors", []):
+                print(f"Checking flavor: {flavor}")
+                if flavor.get("name") == flavor_name:
+                    # Collect quota information
+                    quota_info = [
+                        {
+                            "resource": resource.get("name"),
+                            "nominalQuota": resource.get("nominalQuota")
+                        }
+                        for resource in flavor.get("resources", [])
+                    ]
+                    queues_using_flavor.append({
+                        "queueName": queue["metadata"]["name"],
+                        "quota": quota_info
+                    })
+                    print(f"Added queue {queue['metadata']['name']} using flavor {flavor_name}")
+                    break  # Stop searching if the flavor is already found in this queue
         return {
             "name": flavor["metadata"]["name"],
             "details": flavor.get("spec", {}),
