@@ -128,7 +128,7 @@ async def websocket_handler(websocket: WebSocket, data_fetcher: Callable, endpoi
 
 @app.websocket("/ws/kueue")
 async def websocket_kueue(websocket: WebSocket):
-    await websocket_handler(websocket, lambda: {"queues": get_queues(), "clusterQueues": get_cluster_queues(), "workloads": get_workloads()}, "/ws/kueue")
+    await websocket_handler(websocket, lambda: {"queues": get_queues(), "clusterQueues": get_cluster_queues(), "workloads": get_workloads(), "flavors": get_resource_flavors()}, "/ws/kueue")
 
 @app.websocket("/ws/workloads")
 async def websocket_kueue(websocket: WebSocket):
