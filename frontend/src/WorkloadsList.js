@@ -1,7 +1,7 @@
 import { Link, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip } from '@mui/material';
 import React from 'react';
 
-const WorkloadsList = ({ workloads = [] }) => {
+const WorkloadsList = ({ workloads = { items: [] } }) => {
   return (
     <TableContainer component={Paper}>
       <Table>
@@ -17,7 +17,7 @@ const WorkloadsList = ({ workloads = [] }) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {workloads.items.map((workload, index) => (
+          {(workloads.items || []).map((workload, index) => (
             <TableRow key={workload.metadata?.name || index}>
               <TableCell>
                 <Tooltip
