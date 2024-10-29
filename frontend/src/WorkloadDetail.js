@@ -12,7 +12,7 @@ const WorkloadDetail = () => {
 
   return (
     <Paper style={{ padding: '16px', marginTop: '20px' }}>
-      <Typography variant="h4" gutterBottom>Workload Detail: {workload.metadata.name}</Typography>
+      <Typography variant="h4" gutterBottom>Workload Detail: {workloadName}</Typography>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
           <Typography variant="body1"><strong>Queue Name:</strong> {workload.spec.queueName}</Typography>
