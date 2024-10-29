@@ -247,10 +247,12 @@ def get_resource_flavor_details(flavor_name: str):
                         })
                         break  # Stop searching once the flavor is found in this queue
 
+
         return {
             "name": flavor.get("metadata", {}).get("name", "Unknown Flavor"),
             "details": flavor.get("spec", {}),
-            "queues": queues_using_flavor
+            "queues": queues_using_flavor,
+            "nodesStatus": get_nodes_status_for_flavor(flavor_name)
         }
 
     except client.ApiException as e:
@@ -319,3 +321,51 @@ def get_admitted_workloads(queue_name: str):
         print(f"Error fetching admitted workloads for LocalQueue {queue_name}: {e}")
         return {"error": f"Could not retrieve admitted workloads for LocalQueue {queue_name}"}
 
+def get_nodes_status_for_flavor(flavor):
+    """
+    Retrieves the status of each node with respect to the ResourceFlavor.
+
+    Args:
+    - flavor (dict): ResourceFlavor object with details about labels and taints.
+
+    Returns:
+    - List[dict]: Each entry represents a node with its compatibility status.
+    """
+    # Extract labels and taints from the ResourceFlavor
+    flavor_labels = flavor.get("spec", {}).get("nodeLabels", {})
+    flavor_taints = flavor.get("spec", {}).get("nodeTaints", [])
+
+    nodes_status = []
+
+    # Fetch all nodes in the cluster
+    nodes = k8s_api.list_node().items
+    for node in nodes:
+        node_name = node.metadata.name
+        node_labels = node.metadata.labels
+        node_taints = node.spec.taints or []
+
+        # Check label compatibility
+        label_compatible = all(node_labels.get(key) == value for key, value in flavor_labels.items())
+
+        # Check taint compatibility
+        taint_compatible = True
+        for flavor_taint in flavor_taints:
+            matching_toleration = any(
+                toleration["key"] == flavor_taint["key"] and toleration.get("effect") == flavor_taint.get("effect")
+                for toleration in node_taints
+            )
+            if not matching_toleration:
+                taint_compatible = False
+                break
+
+        # Determine final compatibility status
+        compatibility_status = "Compatible" if label_compatible and taint_compatible else "Incompatible"
+        
+        nodes_status.append({
+            "nodeName": node_name,
+            "labelCompatible": label_compatible,
+            "taintCompatible": taint_compatible,
+            "compatibilityStatus": compatibility_status
+        })
+
+    return nodes_status

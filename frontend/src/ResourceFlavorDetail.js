@@ -62,6 +62,29 @@ const ResourceFlavorDetail = () => {
           </Table>
         </TableContainer>
       )}
+      <Typography variant="h5" gutterBottom>Node Compatibility Status</Typography>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Node Name</TableCell>
+              <TableCell>Label Compatibility</TableCell>
+              <TableCell>Taint Compatibility</TableCell>
+              <TableCell>Status</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {flavorData.nodes?.map((node) => (
+              <TableRow key={node.nodeName}>
+                <TableCell>{node.nodeName}</TableCell>
+                <TableCell>{node.labelCompatible ? 'Compatible' : 'Incompatible'}</TableCell>
+                <TableCell>{node.taintCompatible ? 'Compatible' : 'Incompatible'}</TableCell>
+                <TableCell>{node.compatibilityStatus}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Paper>
   );
 };
