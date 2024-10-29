@@ -17,7 +17,7 @@ const WorkloadsList = ({ workloads }) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {workloads.items.map((workload) => (
+          {workloads.map((workload) => (
             <TableRow key={workload.metadata?.name}>
               <TableCell>
                 <Tooltip
