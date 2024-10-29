@@ -8,18 +8,22 @@ const WorkloadDetail = () => {
   const url = `ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/workload/${workloadName}`;
   const { data: workload, error } = useWebSocket(url);
 
-  if (!workload) return <CircularProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
+
+  // Handle loading state and empty data
+  if (!workload || Object.keys(workload).length === 0) {
+    return <CircularProgress />;
+  }
 
   return (
     <Paper style={{ padding: '16px', marginTop: '20px' }}>
       <Typography variant="h4" gutterBottom>Workload Detail: {workloadName}</Typography>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
-          <Typography variant="body1"><strong>Queue Name:</strong> {workload.spec.queueName}</Typography>
+          <Typography variant="body1"><strong>Queue Name:</strong> {workload.spec?.queueName || 'N/A'}</Typography>
           <Typography variant="body1"><strong>Status:</strong> {workload.status?.state || 'Unknown'}</Typography>
-          <Typography variant="body1"><strong>Priority:</strong> {workload.spec.priority || 'N/A'}</Typography>
-          <Typography variant="body1"><strong>Priority Class Name:</strong> {workload.spec.priorityClassName || 'N/A'}</Typography>
+          <Typography variant="body1"><strong>Priority:</strong> {workload.spec?.priority || 'N/A'}</Typography>
+          <Typography variant="body1"><strong>Priority Class Name:</strong> {workload.spec?.priorityClassName || 'N/A'}</Typography>
         </Grid>
         <Grid item xs={12} sm={6}>
           <Typography variant="body1"><strong>Owner Reference:</strong></Typography>
