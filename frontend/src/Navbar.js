@@ -6,6 +6,10 @@ const Navbar = () => {
   return (
     <AppBar position="static">
       <Toolbar>
+        <Link to="/" className="navbar-link">
+          <img src="/kueue-viz.png" className="navbar-logo" />
+          <Typography variant="h6" component="div">Kueue Viz</Typography>
+        </Link>        
         <Button color="inherit" component={Link} to="/">Dashboard</Button>
         <Button color="inherit" component={Link} to="/local-queues">Local Queues</Button>
         <Button color="inherit" component={Link} to="/cluster-queues">Cluster Queues</Button>

@@ -40,13 +40,14 @@ async def get_kueue_status():
     """
     queues = get_queues()
     workloads = get_workloads()
+    flavors = get_resource_flavors()
 
     # Combine errors if resources are not found
-    if "error" in queues or "error" in workloads:
-        error_message = queues.get("error", "") + workloads.get("error", "")
+    if "error" in queues or "error" in workloads or "error" in flavors :
+        error_message = queues.get("error", "") + workloads.get("error", "") + flavors.get("error", "")
         return {"error": error_message}
 
-    return {"queues": queues, "workloads": workloads}
+    return {"queues": queues, "workloads": workloads, "flavors": flavors}
 
 
 @app.get("/local-queues", response_model=List[LocalQueue])

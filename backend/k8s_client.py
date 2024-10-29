@@ -209,15 +209,13 @@ def get_resource_flavor_details(flavor_name: str):
         )
         
         # List all cluster queues to find the ones that use this flavor
-        cluster_queues = k8s_api.list_cluster_custom_object(
-            group="kueue.x-k8s.io",
-            version="v1beta1",
-            plural="clusterqueues"
-        )
+        cluster_queues = get_cluster_queues()
 
         # Find queues that use the specified flavor
         queues_using_flavor = []
-        for queue in cluster_queues.get("items", []):
+        print(f"Searching for queues using {flavor_name}")
+        for queue in cluster_queues:
+        print(f"Searching for queues using {flavor_name}: checking : {queue}")
             for resource_group in queue.get("spec", {}).get("resourceGroups", []):
                 for flavor in resource_group.get("flavors", []):
                     if flavor.get("name") == flavor_name:
