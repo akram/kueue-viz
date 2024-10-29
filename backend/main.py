@@ -133,7 +133,7 @@ async def websocket_kueue(websocket: WebSocket):
 
 @app.websocket("/ws/workloads")
 async def websocket_kueue(websocket: WebSocket):
-    await websocket_handler(websocket,  get_workloads(), "/ws/workloads")
+    await websocket_handler(websocket, get_workloads, "/ws/workloads")
 
 @app.websocket("/ws/local-queues")
 async def websocket_local_queues(websocket: WebSocket):
