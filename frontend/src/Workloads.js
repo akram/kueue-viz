@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import useWebSocket from './useWebSocket';
 import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, CircularProgress } from '@mui/material';
 
-const ClusterQueues = () => {
+const Workloads = () => {
   const { data: items, error } = useWebSocket('ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/workloads');
   const [workloads, setWorkloads] = useState([]);
 
