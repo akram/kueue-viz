@@ -4,8 +4,8 @@ import Dashboard from './Dashboard';
 import LocalQueues from './LocalQueues';
 import ClusterQueues from './ClusterQueues';
 import ResourceFlavors from './ResourceFlavors';
-import ResourceFlavorDetail from './Workloads';
-import Workloads from './ResourceFlavors';
+import ResourceFlavorDetail from './ResourceFlavorDetail';
+import Workloads from './Workloads';
 
 import Navbar from './Navbar';
 
