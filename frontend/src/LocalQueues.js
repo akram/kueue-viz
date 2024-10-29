@@ -31,7 +31,7 @@ const LocalQueues = () => {
             <TableBody>
               {queues.map((queue) => (
                 <TableRow key={queue.name}>
-                  <TableCell>{queue.name}</TableCell>
+                  <TableCell><Link to={`/local-queue/${queue.name}`}>{queue.name}</Link></TableCell>
                   <TableCell>{queue.status}</TableCell>
                 </TableRow>
               ))}
