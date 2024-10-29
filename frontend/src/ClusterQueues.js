@@ -1,50 +1,46 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-import 'react-toastify/dist/ReactToastify.css';
-import { toast, ToastContainer } from 'react-toastify';
+import React, { useState, useEffect } from 'react';
 import useWebSocket from './useWebSocket';
+import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, CircularProgress } from '@mui/material';
 
 const ClusterQueues = () => {
-    // Initialize WebSocket connection
-    const { data: clusterQueues, error } = useWebSocket(`http://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/cluster-queues`);
+  const { data: clusterQueues, error } = useWebSocket('ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/cluster-queues');
+  const [queues, setQueues] = useState([]);
 
-    // Display toast notifications if a specific condition is met
-    clusterQueues.forEach(queue => {
-      if (queue.status === "updated") {
-        toast.info(`Cluster queue ${queue.name} has been updated.`);
-      }
-    });
+  useEffect(() => {
+    if (clusterQueues && Array.isArray(clusterQueues)) {
+      setQueues(clusterQueues);
+    }
+  }, [clusterQueues]);
 
-    return (
-      <div>
-        <Typography variant="h4" gutterBottom>
-          Cluster Queues
-        </Typography>
-        {error && <Typography color="error">{error}</Typography>}
+  if (error) return <Typography color="error">{error}</Typography>;
+
+  return (
+    <Paper style={{ padding: '16px', marginTop: '20px' }}>
+      <Typography variant="h4" gutterBottom>Cluster Queues</Typography>
+      {queues.length === 0 ? (
+        <CircularProgress />
+      ) : (
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
               <TableRow>
                 <TableCell>Name</TableCell>
-                <TableCell>Status</TableCell>
-                {/* Add more columns as needed */}
+                <TableCell>Flavor</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {clusterQueues.map(queue => (
+              {queues.map((queue) => (
                 <TableRow key={queue.name}>
                   <TableCell>{queue.name}</TableCell>
-                  <TableCell>{queue.status}</TableCell>
-                  {/* Add more cells as needed */}
+                  <TableCell>{queue.flavor}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
-      </div>
-    );
-  };
+      )}
+    </Paper>
+  );
+};
 
-  export default ClusterQueues;
-
+export default ClusterQueues;
