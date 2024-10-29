@@ -13,6 +13,7 @@ const App = () => {
       <Navbar />
       <Routes>
         <Route path="/" element={<Dashboard />} />
+        <Route path="/workloads" element={<Workloads/>} />
         <Route path="/local-queues" element={<LocalQueues />} />
         <Route path="/cluster-queues" element={<ClusterQueues />} />
         <Route path="/resource-flavors" element={<ResourceFlavors />} />

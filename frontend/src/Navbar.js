@@ -11,6 +11,7 @@ const Navbar = () => {
           <img src="/kueue-viz.png" className="navbar-logo"/>
         </Link>
         <Button color="inherit" component={Link} to="/">Dashboard</Button>
+        <Button color="inherit" component={Link} to="/workloads">Workloads</Button>
         <Button color="inherit" component={Link} to="/local-queues">Local Queues</Button>
         <Button color="inherit" component={Link} to="/cluster-queues">Cluster Queues</Button>
         <Button color="inherit" component={Link} to="/resource-flavors">Resource Flavors</Button>
