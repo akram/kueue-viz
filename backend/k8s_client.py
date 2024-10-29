@@ -215,7 +215,7 @@ def get_resource_flavor_details(flavor_name: str):
         queues_using_flavor = []
         print(f"Searching for queues using {flavor_name}")
         for queue in cluster_queues:
-        print(f"Searching for queues using {flavor_name}: checking : {queue}")
+            print(f"Searching for queues using {flavor_name}: checking : {queue}")
             for resource_group in queue.get("spec", {}).get("resourceGroups", []):
                 for flavor in resource_group.get("flavors", []):
                     if flavor.get("name") == flavor_name:
