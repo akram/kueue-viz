@@ -5,13 +5,13 @@ import 'react-toastify/dist/ReactToastify.css';
 import useWebSocket from './useWebSocket';
 
 const Workloads = () => {
-  const { data: workloadsData, error } = useWebSocket('ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/workloads');
+  const { data: data, error } = useWebSocket('ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/kueue');
   const [workloads, setWorkloads] = useState([]);
   useEffect(() => {
-    if (workloadsData && Array.isArray(workloadsData)) {
-      setWorkloads(workloadsData.workloads.items);
-    }
-  }, [workloadsData]);
+      setWorkloads(data.workloads.items || []);
+  }, []);
+
+  
   if (error) return <Typography color="error">{error}</Typography>;
   return (
     <>
