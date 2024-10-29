@@ -57,7 +57,6 @@ def get_cluster_queues():
     Retrieves cluster queues and their flavors across the cluster.
     """
     try:
-        # Assuming 'clusterqueues' is the plural name for the cluster queue custom resources
         cluster_queues = k8s_api.list_cluster_custom_object(
             group="kueue.x-k8s.io",
             version="v1beta1",
@@ -65,15 +64,19 @@ def get_cluster_queues():
         )
         return [
             {
-                "name": item["metadata"]["name"],
-                "flavor": item.get("spec", {}).get("flavor", "Default"),
-                # Add more fields as required
+                "name": queue["metadata"]["name"],
+                "flavors": [
+                    flavor["name"]
+                    for resource_group in queue.get("spec", {}).get("resourceGroups", [])
+                    for flavor in resource_group.get("flavors", [])
+                ]
             }
-            for item in cluster_queues.get("items", [])
+            for queue in cluster_queues.get("items", [])
         ]
     except client.ApiException as e:
         print(f"Error fetching cluster queues: {e}")
         return []
+
 
 def get_queues():
     try:
