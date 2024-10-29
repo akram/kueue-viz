@@ -3,26 +3,22 @@ import axios from 'axios';
 import { Typography } from '@mui/material';
 import WorkloadsList from './WorkloadsList';
 
+
+
+
+
 const Workloads = () => {
   const [workloads, setWorkloads] = useState([]);
-  const [error, setError] = useState(null);
+  const { data: items, error } = useWebSocket('ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/cluster-queues');
+  const [queues, setQueues] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get('http://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/kueue/workloads');
-        setWorkloads(response.data.items || []);
-      } catch (error) {
-        setError('Failed to fetch workloads');
-        console.error("Error fetching workloads:", error);
-      }
-    };
-
-    fetchData();
-  }, []);
+    if (items && Array.isArray(items)) {
+      setWorkloads(items);
+    }
+  }, [items]);
 
   if (error) return <Typography variant="h6" color="error">{error}</Typography>;
-
   return (
     <>
       <Typography variant="h5" gutterBottom>All Workloads</Typography>
