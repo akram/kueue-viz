@@ -4,6 +4,8 @@ from kubernetes import client, config
 # Load Kubernetes configuration for in-cluster access
 config.load_incluster_config()
 k8s_api = client.CustomObjectsApi()
+core_api = client.CoreV1Api()
+
 
 # Determine the namespace dynamically from the mounted file
 def get_namespace():
@@ -131,7 +133,7 @@ def get_events_by_workload_name(workload_name: str):
     Retrieves events related to the given workload.
     """
     try:
-        events = k8s_api.list_namespaced_event(
+        events = core_api.list_namespaced_event(
             namespace=namespace,
             field_selector=f"involvedObject.name={workload_name}"
         )
