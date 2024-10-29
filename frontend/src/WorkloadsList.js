@@ -1,7 +1,7 @@
 import { Link, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip } from '@mui/material';
 import React from 'react';
 
-const WorkloadsList = ({ workloads }) => {
+const WorkloadsList = ({ workloads = [] }) => {
   return (
     <TableContainer component={Paper}>
       <Table>
