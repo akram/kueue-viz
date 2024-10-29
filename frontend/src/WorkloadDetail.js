@@ -5,7 +5,8 @@ import useWebSocket from './useWebSocket';
 
 const WorkloadDetail = () => {
   const { workloadName } = useParams();
-  const { data: workload, error } = useWebSocket(`ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/workload/${workloadName}`);
+  const url = `ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/workload/${workloadName}`;
+  const { data: workload, error } = useWebSocket(url);
 
   if (!workload) return <CircularProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
