@@ -216,10 +216,13 @@ def get_resource_flavor_details(flavor_name: str):
         # Find queues that use the specified flavor
         queues_using_flavor = []
         print(f"Searching for queues using {flavor_name}")
+        
         for queue in cluster_queues:
-            print(f"Searching for queues using {flavor_name}: checking : {queue}")
+            print(f"Checking queue: {queue['metadata']['name']}")
             for resource_group in queue.get("spec", {}).get("resourceGroups", []):
+                print(f"Resource group found: {resource_group}")
                 for flavor in resource_group.get("flavors", []):
+                    print(f"Checking flavor: {flavor}")
                     if flavor.get("name") == flavor_name:
                         # Collect quota information
                         quota_info = [
@@ -233,6 +236,7 @@ def get_resource_flavor_details(flavor_name: str):
                             "queueName": queue["metadata"]["name"],
                             "quota": quota_info
                         })
+                        print(f"Added queue {queue['metadata']['name']} using flavor {flavor_name}")
                         break  # Stop searching if the flavor is already found in this queue
 
         return {
@@ -243,6 +247,7 @@ def get_resource_flavor_details(flavor_name: str):
     except client.ApiException as e:
         print(f"Error fetching resource flavor details for {flavor_name}: {e}")
         return None
+
 
 
 
