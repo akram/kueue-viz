@@ -9,20 +9,16 @@ import useWebSocket from './useWebSocket';
 
 const Workloads = () => {
   const [workloads, setWorkloads] = useState([]);
-  const { data: items, error } = useWebSocket('ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/workloads');
-  const [queues, setQueues] = useState([]);
-
+  const { data: workloadsData, error } = useWebSocket('ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/workloads');
   useEffect(() => {
-    if (items && Array.isArray(items)) {
-      setWorkloads(items);
-    }
-  }, [items]);
+      setWorkloads(workloadsData?.items);
+  }, [workloadsData]);
 
   if (error) return <Typography variant="h6" color="error">{error}</Typography>;
   return (
     <>
       <Typography variant="h5" gutterBottom>All Workloads</Typography>
-      <WorkloadsList workloads={workloads.items} />
+      <WorkloadsList workloads={workloads} />
     </>
   );
 };
