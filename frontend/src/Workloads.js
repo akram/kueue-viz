@@ -9,7 +9,7 @@ import useWebSocket from './useWebSocket';
 
 const Workloads = () => {
   const [workloads, setWorkloads] = useState([]);
-  const { data: items, error } = useWebSocket('ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/cluster-queues');
+  const { data: items, error } = useWebSocket('ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/workloads');
   const [queues, setQueues] = useState([]);
 
   useEffect(() => {
