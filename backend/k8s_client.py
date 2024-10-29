@@ -197,26 +197,41 @@ def get_resource_flavor_details(flavor_name: str):
     Retrieves details of a specific resource flavor, including queues using it.
     """
     try:
+        # Get the specified resource flavor details
         flavor = k8s_api.get_cluster_custom_object(
             group="kueue.x-k8s.io",
             version="v1beta1",
             plural="resourceflavors",
             name=flavor_name
         )
-        # Find queues that use this flavor
-        queues = k8s_api.list_cluster_custom_object(
+        
+        # List all cluster queues to find the ones that use this flavor
+        cluster_queues = k8s_api.list_cluster_custom_object(
             group="kueue.x-k8s.io",
             version="v1beta1",
             plural="clusterqueues"
         )
-        queues_using_flavor = [
-            {
-                "queueName": queue["metadata"]["name"],
-                "quota": queue.get("spec", {}).get("quota", {})
-            }
-            for queue in queues.get("items", [])
-            if any(resource["flavor"] == flavor_name for resource in queue.get("spec", {}).get("resources", []))
-        ]
+
+        # Find queues that use the specified flavor
+        queues_using_flavor = []
+        for queue in cluster_queues.get("items", []):
+            for resource_group in queue.get("spec", {}).get("resourceGroups", []):
+                for flavor in resource_group.get("flavors", []):
+                    if flavor.get("name") == flavor_name:
+                        # Collect quota information
+                        quota_info = [
+                            {
+                                "resource": resource.get("name"),
+                                "nominalQuota": resource.get("nominalQuota")
+                            }
+                            for resource in flavor.get("resources", [])
+                        ]
+                        queues_using_flavor.append({
+                            "queueName": queue["metadata"]["name"],
+                            "quota": quota_info
+                        })
+                        break  # Stop searching if the flavor is already found in this queue
+
         return {
             "name": flavor["metadata"]["name"],
             "details": flavor.get("spec", {}),
@@ -225,5 +240,3 @@ def get_resource_flavor_details(flavor_name: str):
     except client.ApiException as e:
         print(f"Error fetching resource flavor details for {flavor_name}: {e}")
         return None
-
-

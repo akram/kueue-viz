@@ -35,15 +35,19 @@ const ResourceFlavorDetail = () => {
             <TableHead>
               <TableRow>
                 <TableCell>Queue Name</TableCell>
-                <TableCell>Quota</TableCell>
+                <TableCell>Resource</TableCell>
+                <TableCell>Nominal Quota</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {flavor.queues.map((queue) => (
-                <TableRow key={queue.queueName}>
-                  <TableCell>{queue.queueName}</TableCell>
-                  <TableCell>{JSON.stringify(queue.quota)}</TableCell>
-                </TableRow>
+                queue.quota.map((resource, index) => (
+                  <TableRow key={`${queue.queueName}-${resource.resource}-${index}`}>
+                    <TableCell>{queue.queueName}</TableCell>
+                    <TableCell>{resource.resource}</TableCell>
+                    <TableCell>{resource.nominalQuota}</TableCell>
+                  </TableRow>
+                ))
               ))}
             </TableBody>
           </Table>
@@ -54,4 +58,3 @@ const ResourceFlavorDetail = () => {
 };
 
 export default ResourceFlavorDetail;
-

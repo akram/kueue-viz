@@ -20,6 +20,7 @@ const WorkloadDetail = () => {
     }
   }, [eventData]);
 
+  // Handle loading state for workload and events
   if (!workload) return <CircularProgress />;
   if (workloadError) return <Typography color="error">{workloadError}</Typography>;
 
@@ -63,8 +64,8 @@ const WorkloadDetail = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {events.map((event) => (
-                <TableRow key={event.name}>
+              {events.map((event, index) => (
+                <TableRow key={index}>
                   <TableCell>{new Date(event.timestamp).toLocaleString()}</TableCell>
                   <TableCell>{event.type}</TableCell>
                   <TableCell>{event.reason}</TableCell>
