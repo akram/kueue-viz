@@ -9,6 +9,8 @@ const Navbar = () => {
         <Button color="inherit" component={Link} to="/">Dashboard</Button>
         <Button color="inherit" component={Link} to="/local-queues">Local Queues</Button>
         <Button color="inherit" component={Link} to="/cluster-queues">Cluster Queues</Button>
+        <Button color="inherit" component={Link} to="/resource-flavors">Resource Flavors</Button>
+
       </Toolbar>
     </AppBar>
   );
