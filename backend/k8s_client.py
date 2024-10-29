@@ -14,7 +14,9 @@ __all__ = [
     "get_workload_by_name",
     "get_events_by_workload_name",
     "get_resource_flavors",
-    "get_resource_flavor_details"
+    "get_resource_flavor_details",
+    "get_admitted_workloads",
+    "get_local_queue_details"
 ]
 
 # Determine the namespace dynamically from the mounted file
@@ -241,3 +243,65 @@ def get_resource_flavor_details(flavor_name: str):
     except client.ApiException as e:
         print(f"Error fetching resource flavor details for {flavor_name}: {e}")
         return None
+
+
+
+def get_local_queue_details(queue_name: str):
+    """
+    Retrieves detailed information about a specific LocalQueue.
+    """
+    try:
+        # Fetch the LocalQueue object
+        local_queue = k8s_api.get_namespaced_custom_object(
+            group="kueue.x-k8s.io",
+            version="v1beta1",
+            namespace=namespace,
+            plural="localqueues",
+            name=queue_name
+        )
+        return {
+            "metadata": {
+                "name": local_queue["metadata"]["name"],
+                "namespace": local_queue["metadata"]["namespace"],
+                "uid": local_queue["metadata"]["uid"],
+                "creationTimestamp": local_queue["metadata"]["creationTimestamp"],
+            },
+            "spec": local_queue.get("spec", {}),
+            "status": local_queue.get("status", {}),
+        }
+    except client.ApiException as e:
+        print(f"Error fetching LocalQueue details for {queue_name}: {e}")
+        return {"error": f"Could not retrieve details for LocalQueue {queue_name}"}
+
+
+def get_admitted_workloads(queue_name: str):
+    """
+    Retrieves all workloads admitted into the specified LocalQueue.
+    """
+    try:
+        # List all workloads in the namespace
+        workloads = k8s_api.list_namespaced_custom_object(
+            group="kueue.x-k8s.io",
+            version="v1beta1",
+            namespace=namespace,
+            plural="workloads"
+        )
+
+        # Filter workloads that are admitted to the specified queue
+        admitted_workloads = [
+            {
+                "metadata": {
+                    "name": workload["metadata"]["name"],
+                    "namespace": workload["metadata"]["namespace"],
+                },
+                "status": workload.get("status", {}),
+            }
+            for workload in workloads.get("items", [])
+            if workload.get("status", {}).get("admission", {}).get("queueName") == queue_name
+        ]
+
+        return admitted_workloads
+    except client.ApiException as e:
+        print(f"Error fetching admitted workloads for LocalQueue {queue_name}: {e}")
+        return {"error": f"Could not retrieve admitted workloads for LocalQueue {queue_name}"}
+

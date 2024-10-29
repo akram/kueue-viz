@@ -172,3 +172,12 @@ async def websocket_resource_flavor_details(websocket: WebSocket, flavor_name: s
     await websocket_handler(websocket, lambda: get_resource_flavor_details(flavor_name), f"/ws/resource-flavor/{flavor_name}")
 
 
+@app.websocket("/ws/local-queue/{queue_name}")
+async def websocket_local_queue_details(websocket: WebSocket, queue_name: str):
+    await websocket_handler(websocket, lambda: get_local_queue_details(queue_name), f"/ws/local-queue/{queue_name}")
+
+@app.websocket("/ws/local-queue/{queue_name}/workloads")
+async def websocket_local_queue_workloads(websocket: WebSocket, queue_name: str):
+    await websocket_handler(websocket, lambda: get_admitted_workloads(queue_name), f"/ws/local-queue/{queue_name}/workloads")
+
+
