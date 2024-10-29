@@ -2,35 +2,26 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Typography, Paper, CircularProgress, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import useWebSocket from './useWebSocket';
-import axios from 'axios';
 
 const WorkloadDetail = () => {
   const { workloadName } = useParams();
-  const url = `ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/workload/${workloadName}`;
-  const { data: workload, error } = useWebSocket(url);
+  const workloadUrl = `ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/workload/${workloadName}`;
+  const eventsUrl = `ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/workload/${workloadName}/events`;
+
+  const { data: workload, error: workloadError } = useWebSocket(workloadUrl);
+  const { data: eventData, error: eventError } = useWebSocket(eventsUrl);
+
   const [events, setEvents] = useState([]);
-  const [loadingEvents, setLoadingEvents] = useState(true);
-  const [eventError, setEventError] = useState(null);
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const response = await axios.get(`http://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/kueue/workload/${workloadName}/events`);
-        const sortedEvents = response.data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-        setEvents(sortedEvents);
-      } catch (error) {
-        console.error("Error fetching events:", error);
-        setEventError('Failed to fetch events');
-      } finally {
-        setLoadingEvents(false);
-      }
-    };
-
-    fetchEvents();
-  }, [workloadName]);
+    if (eventData && Array.isArray(eventData)) {
+      const sortedEvents = eventData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      setEvents(sortedEvents);
+    }
+  }, [eventData]);
 
   if (!workload) return <CircularProgress />;
-  if (error) return <Typography color="error">{error}</Typography>;
+  if (workloadError) return <Typography color="error">{workloadError}</Typography>;
 
   return (
     <Paper style={{ padding: '16px', marginTop: '20px' }}>
@@ -58,9 +49,7 @@ const WorkloadDetail = () => {
         Events
       </Typography>
 
-      {loadingEvents ? (
-        <CircularProgress />
-      ) : eventError ? (
+      {eventError ? (
         <Typography color="error">{eventError}</Typography>
       ) : (
         <TableContainer component={Paper}>
