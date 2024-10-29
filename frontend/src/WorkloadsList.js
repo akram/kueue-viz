@@ -17,14 +17,14 @@ const WorkloadsList = ({ workloads }) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {workloads.map((workload) => (
-            <TableRow key={workload.metadata.name}>
+          {workloads.map((workload, index) => (
+            <TableRow key={workload.metadata?.name || index}>
               <TableCell>
                 <Tooltip
                   title={
                     <div>
                       <div><strong>Pod Sets Count:</strong> {workload.spec?.podSets?.[0]?.count || 'N/A'}</div>
-                      <div><strong>Owner Reference: {workload.ownerReferences?.[0]?.uid || 'N/A'}</strong></div>
+                      <div><strong>Owner Reference:</strong> {workload.ownerReferences?.[0]?.uid || 'N/A'}</div>
                       <div>API Version: {workload.ownerReferences?.[0]?.apiVersion || 'N/A'}</div>
                       <div>Kind: {workload.ownerReferences?.[0]?.kind || 'N/A'}</div>
                       <div>Name: {workload.ownerReferences?.[0]?.name || 'N/A'}</div>
@@ -32,19 +32,27 @@ const WorkloadsList = ({ workloads }) => {
                   }
                   arrow
                 >
-                  <Link to={`/workload/${workload.metadata.name}`}>
+                  <Link to={`/workload/${workload.metadata?.name || ''}`}>
                     <span style={{ cursor: 'pointer', textDecoration: 'underline', color: 'blue' }}>
-                      {workload.metadata.name}
+                      {workload.metadata?.name || 'Unnamed'}
                     </span>
                   </Link>
                 </Tooltip>
               </TableCell>
-              <TableCell><Link to={`/local-queue/${workload.spec.queueName}`}>{workload.spec.queueName}</Link></TableCell>
+              <TableCell>
+                {workload.spec?.queueName ? (
+                  <Link to={`/local-queue/${workload.spec.queueName}`}>
+                    {workload.spec.queueName}
+                  </Link>
+                ) : (
+                  'N/A'
+                )}
+              </TableCell>
               <TableCell>{workload.status?.state || "Unknown"}</TableCell>
               <TableCell>{workload.preemption?.preempted ? "Yes" : "No"}</TableCell>
               <TableCell>{workload.preemption?.reason || "N/A"}</TableCell>
-              <TableCell>{workload.spec.priority}</TableCell>
-              <TableCell>{workload.spec.priorityClassName}</TableCell>
+              <TableCell>{workload.spec?.priority || "N/A"}</TableCell>
+              <TableCell>{workload.spec?.priorityClassName || "N/A"}</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -54,5 +62,3 @@ const WorkloadsList = ({ workloads }) => {
 };
 
 export default WorkloadsList;
-
-
