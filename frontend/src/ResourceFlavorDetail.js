@@ -11,13 +11,22 @@ const ResourceFlavorDetail = () => {
   const [flavor, setFlavor] = useState(null);
 
   useEffect(() => {
-    if (flavorData) {
+    if (flavorData && flavorData.name) {
+      console.log("Received flavor data:", flavorData); // Debug line
       setFlavor(flavorData);
     }
   }, [flavorData]);
 
-  if (!flavor) return <CircularProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
+
+  if (!flavor) {
+    return (
+      <Paper style={{ padding: '16px', marginTop: '20px' }}>
+        <Typography variant="h6">Loading...</Typography>
+        <CircularProgress />
+      </Paper>
+    );
+  }
 
   return (
     <Paper style={{ padding: '16px', marginTop: '20px' }}>
@@ -27,7 +36,7 @@ const ResourceFlavorDetail = () => {
       <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>
         Queues Using This Flavor
       </Typography>
-      {flavor.queues.length === 0 ? (
+      {flavor.queues && flavor.queues.length === 0 ? (
         <Typography>No queues are using this flavor.</Typography>
       ) : (
         <TableContainer component={Paper}>
@@ -40,7 +49,7 @@ const ResourceFlavorDetail = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {flavor.queues.map((queue) => (
+              {flavor.queues?.map((queue) => (
                 queue.quota.map((resource, index) => (
                   <TableRow key={`${queue.queueName}-${resource.resource}-${index}`}>
                     <TableCell>{queue.queueName}</TableCell>
