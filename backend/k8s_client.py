@@ -126,6 +126,34 @@ def get_workload_by_name(workload_name: str):
         print(f"Error fetching workload {workload_name}: {e}")
         return None
 
+def get_events_by_workload_name(workload_name: str):
+    """
+    Retrieves events related to the given workload.
+    """
+    try:
+        events = k8s_api.list_namespaced_event(
+            namespace=namespace,
+            field_selector=f"involvedObject.name={workload_name}"
+        )
+        return [
+            {
+                "name": event.metadata.name,
+                "reason": event.reason,
+                "message": event.message,
+                "timestamp": event.last_timestamp,
+                "type": event.type,
+            }
+            for event in events.items
+        ]
+    except client.ApiException as e:
+        print(f"Error fetching events for workload {workload_name}: {e}")
+        return []
+
+
+
+
+
+
 def get_queue_status(namespace: str = "default"):
     """
     Combines queue and workload data for a complete Kueue status.

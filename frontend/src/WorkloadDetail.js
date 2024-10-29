@@ -1,19 +1,36 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Typography, Paper, CircularProgress, Grid } from '@mui/material';
+import { Typography, Paper, CircularProgress, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import useWebSocket from './useWebSocket';
+import axios from 'axios';
 
 const WorkloadDetail = () => {
   const { workloadName } = useParams();
   const url = `ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/workload/${workloadName}`;
   const { data: workload, error } = useWebSocket(url);
+  const [events, setEvents] = useState([]);
+  const [loadingEvents, setLoadingEvents] = useState(true);
+  const [eventError, setEventError] = useState(null);
 
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await axios.get(`http://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/kueue/workload/${workloadName}/events`);
+        const sortedEvents = response.data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        setEvents(sortedEvents);
+      } catch (error) {
+        console.error("Error fetching events:", error);
+        setEventError('Failed to fetch events');
+      } finally {
+        setLoadingEvents(false);
+      }
+    };
+
+    fetchEvents();
+  }, [workloadName]);
+
+  if (!workload) return <CircularProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
-
-  // Handle loading state and empty data
-  if (!workload || Object.keys(workload).length === 0) {
-    return <CircularProgress />;
-  }
 
   return (
     <Paper style={{ padding: '16px', marginTop: '20px' }}>
@@ -36,6 +53,39 @@ const WorkloadDetail = () => {
           <Typography variant="body1"><strong>Pod Sets Count:</strong> {workload.spec?.podSets?.[0]?.count || 'N/A'}</Typography>
         </Grid>
       </Grid>
+
+      <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>
+        Events
+      </Typography>
+
+      {loadingEvents ? (
+        <CircularProgress />
+      ) : eventError ? (
+        <Typography color="error">{eventError}</Typography>
+      ) : (
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Timestamp</TableCell>
+                <TableCell>Type</TableCell>
+                <TableCell>Reason</TableCell>
+                <TableCell>Message</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {events.map((event) => (
+                <TableRow key={event.name}>
+                  <TableCell>{new Date(event.timestamp).toLocaleString()}</TableCell>
+                  <TableCell>{event.type}</TableCell>
+                  <TableCell>{event.reason}</TableCell>
+                  <TableCell>{event.message}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
     </Paper>
   );
 };

@@ -3,11 +3,10 @@ import asyncio
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, List, Callable
-from k8s_client import get_queues, get_workloads, get_local_queues, get_cluster_queues, get_workload_by_name
+from k8s_client import get_queues, get_workloads, get_local_queues, get_cluster_queues, get_workload_by_name,get_events_by_workload_name
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Kueue Visualization API", version="1.0")
-
 frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")  # Default to localhost for local testing
 
 # Allow CORS for the frontend origin
@@ -73,6 +72,10 @@ async def get_workload_detail(workload_name: str):
     return workload
 
 
+@app.get("/kueue/workload/{workload_name}/events")
+async def get_workload_events(workload_name: str):
+    events = get_events_by_workload_name(workload_name)
+    return events
 
 # Generic WebSocket setup
 class ConnectionManager:
@@ -143,3 +146,6 @@ async def websocket_cluster_queues(websocket: WebSocket):
 @app.websocket("/ws/workload/{workload_name}")
 async def websocket_workload(websocket: WebSocket, workload_name: str):
     await websocket_handler(websocket, lambda: get_workload_by_name(workload_name), f"/ws/workload/{workload_name}")
+
+
+    
