@@ -127,7 +127,11 @@ const Dashboard = () => {
                     }
                     arrow
                   >
-                    <span>{workload.metadata.name}</span>
+                    <Link to={`/workload/${workload.metadata.name}`}>
+                      <span style={{ cursor: 'pointer', textDecoration: 'underline', color: 'blue' }}>
+                        {workload.metadata.name}
+                      </span>
+                    </Link>
                   </Tooltip>
                 </TableCell>
                 <TableCell>{workload.spec.queueName}</TableCell>
