@@ -1,31 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
 import { Typography, Paper, CircularProgress, Grid } from '@mui/material';
+import useWebSocket from './useWebSocket';
 
 const WorkloadDetail = () => {
   const { workloadName } = useParams();
-  const [workload, setWorkload] = useState(null);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { data: workload, error } = useWebSocket(`ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/workload/${workloadName}`);
 
-  useEffect(() => {
-    const fetchWorkloadDetail = async () => {
-      try {
-        const response = await axios.get(`http://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/kueue/workload/${workloadName}`);
-        setWorkload(response.data);
-      } catch (error) {
-        setError('Failed to fetch workload details');
-        console.error("Error fetching workload details:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchWorkloadDetail();
-  }, [workloadName]);
-
-  if (loading) return <CircularProgress />;
+  if (!workload) return <CircularProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
 
   return (

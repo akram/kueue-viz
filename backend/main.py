@@ -65,6 +65,15 @@ async def get_cluster_queues_endpoint():
     return get_cluster_queues()  # Calls the function defined in k8s_client
 
 
+@app.get("/kueue/workload/{workload_name}")
+async def get_workload_detail(workload_name: str):
+    workload = get_workload_by_name(workload_name)
+    if workload is None:
+        raise HTTPException(status_code=404, detail="Workload not found")
+    return workload
+
+
+
 # Generic WebSocket setup
 class ConnectionManager:
     def __init__(self):
@@ -129,3 +138,8 @@ async def websocket_local_queues(websocket: WebSocket):
 @app.websocket("/ws/cluster-queues")
 async def websocket_cluster_queues(websocket: WebSocket):
     await websocket_handler(websocket, get_cluster_queues, "/ws/cluster-queues")
+
+# New WebSocket endpoint for individual workload updates
+@app.websocket("/ws/workload/{workload_name}")
+async def websocket_workload(websocket: WebSocket, workload_name: str):
+    await websocket_handler(websocket, lambda: get_workload_by_name(workload_name), f"/ws/workload/{workload_name}")
