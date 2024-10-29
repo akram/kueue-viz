@@ -8,14 +8,12 @@ import 'react-toastify/dist/ReactToastify.css';
 const Dashboard = () => {
   const [queues, setQueues] = useState([]);
   const [workloads, setWorkloads] = useState([]);
-  const [flavors, setFlavors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const processWorkloadData = (data) => {
     setQueues(data.queues.items || []);
     setWorkloads(data.workloads.items || []);
-    setFlavors(data.flavors.items || []);
 
     // Check for preempted workloads and trigger a notification
     data.workloads.items.forEach(workload => {
@@ -93,12 +91,6 @@ const Dashboard = () => {
             <Typography variant="h3">
               {workloads.filter(wl => wl.status?.state === "Pending").length}
             </Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
-          <Paper elevation={3} style={{ padding: '16px' }}>
-            <Typography variant="h6">Number of Resource Flavors</Typography>
-            <Typography variant="h3">{flavors.length}</Typography>
           </Paper>
         </Grid>
       </Grid>
