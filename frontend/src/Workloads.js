@@ -9,7 +9,7 @@ const Workloads = () => {
   const [workloads, setWorkloads] = useState([]);
   useEffect(() => {
     if (workloadsData && Array.isArray(workloadsData)) {
-      setWorkloads(workloadsData);
+      setWorkloads(workloadsData.items);
     }
   }, [workloadsData]);
   if (error) return <Typography color="error">{error}</Typography>;
