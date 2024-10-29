@@ -8,10 +8,9 @@ const Workloads = () => {
   const { data: data, error } = useWebSocket('ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/kueue');
   const [workloads, setWorkloads] = useState([]);
   useEffect(() => {
-      setWorkloads(data.workloads.items || []);
-  }, []);
+      setWorkloads(data?.workloads?.items || []);
+  }, [data]);
 
-  
   if (error) return <Typography color="error">{error}</Typography>;
   return (
     <>
