@@ -6,20 +6,17 @@ import useWebSocket from './useWebSocket';
 const ClusterQueueDetail = () => {
   const { clusterQueueName } = useParams();
   const url = `ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/cluster-queue/${clusterQueueName}`;
-
   const { data: clusterQueueData, error } = useWebSocket(url);
 
   const [clusterQueue, setClusterQueue] = useState(null);
 
   useEffect(() => {
-    console.log("Received clusterQueue data:", clusterQueueData); // Debug line
     if (clusterQueueData) setClusterQueue(clusterQueueData);
   }, [clusterQueueData]);
 
   if (error) return <Typography color="error">{error}</Typography>;
 
   if (!clusterQueue) {
-    console.log("Received empty clusterQueue data:", clusterQueueData); // Debug line
     return (
       <Paper style={{ padding: '16px', marginTop: '20px' }}>
         <Typography variant="h6">Loading...</Typography>
@@ -31,7 +28,6 @@ const ClusterQueueDetail = () => {
   return (
     <Paper style={{ padding: '16px', marginTop: '20px' }}>
       <Typography variant="h4" gutterBottom>Cluster Queue Detail: {clusterQueueName}</Typography>
-      <Typography variant="body1"><strong>Details:</strong> {JSON.stringify(clusterQueue.spec)}</Typography>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
           <Typography variant="body1"><strong>Name:</strong> {clusterQueue.metadata?.name}</Typography>
@@ -39,30 +35,60 @@ const ClusterQueueDetail = () => {
           <Typography variant="body1"><strong>Creation Timestamp:</strong> {new Date(clusterQueue.metadata?.creationTimestamp).toLocaleString()}</Typography>
         </Grid>
       </Grid>
+
       <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>
         Local Queues Using This Cluster Queue
       </Typography>
+      
       {clusterQueue.queues && clusterQueue.queues.length === 0 ? (
-        <Typography>No local queues are using this clusterQueue.</Typography>
+        <Typography>No local queues are using this cluster queue.</Typography>
       ) : (
-        <TableContainer component={Paper}>
+        <TableContainer component={Paper} style={{ marginTop: '20px' }}>
           <Table>
             <TableHead>
               <TableRow>
                 <TableCell>Queue Name</TableCell>
+                <TableCell>Flavor</TableCell>
+                <TableCell>Resource</TableCell>
                 <TableCell>Reservation</TableCell>
                 <TableCell>Usage</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-            {clusterQueue.queues.map((queue) => (
-              <TableRow>
-                <TableCell>{queue.name}</TableCell>
-                <TableCell>{JSON.stringify(queue.reservation)}</TableCell>
-                <TableCell>{JSON.stringify(queue.usage)}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
+              {clusterQueue.queues.map((queue) => (
+                <React.Fragment key={queue.name}>
+                  {queue.reservation?.map((reservation, resIndex) => (
+                    <React.Fragment key={`${queue.name}-reservation-${resIndex}`}>
+                      {reservation.resources?.map((resource, resResourceIndex) => (
+                        <TableRow key={`${queue.name}-${reservation.name}-${resource.name}`}>
+                          {/* Display Queue Name with rowSpan across all flavors and resources */}
+                          {resIndex === 0 && resResourceIndex === 0 && (
+                            <TableCell rowSpan={queue.reservation.reduce((acc, flavor) => acc + (flavor.resources?.length || 0), 0)}>
+                              {queue.name}
+                            </TableCell>
+                          )}
+
+                          {/* Display Flavor Name with rowSpan across its resources */}
+                          {resResourceIndex === 0 && (
+                            <TableCell rowSpan={reservation.resources?.length || 1}>
+                              {reservation.name}
+                            </TableCell>
+                          )}
+
+                          {/* Display Resource Name, Reservation, and Usage */}
+                          <TableCell>{resource.name}</TableCell>
+                          <TableCell>{resource.total}</TableCell>
+                          <TableCell>
+                            {queue.usage?.find((usage) => usage.name === reservation.name)
+                              ?.resources?.find((res) => res.name === resource.name)?.total || 'N/A'}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </React.Fragment>
+                  ))}
+                </React.Fragment>
+              ))}
+            </TableBody>
           </Table>
         </TableContainer>
       )}

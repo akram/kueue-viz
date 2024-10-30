@@ -37,13 +37,13 @@ const ResourceFlavorDetail = () => {
         Queues Using This Flavor
       </Typography>
       {flavor.queues && flavor.queues.length === 0 ? (
-        <Typography>No queues are using this flavor.</Typography>
+        <Typography>No cluster queues are using this flavor.</Typography>
       ) : (
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Queue Name</TableCell>
+                <TableCell>Cluster Queue Name</TableCell>
                 <TableCell>Resource</TableCell>
                 <TableCell>Nominal Quota</TableCell>
               </TableRow>
