@@ -34,7 +34,7 @@ const ClusterQueues = () => {
               {queues.map((queue) => (
                 <TableRow key={queue.name}>
                   <TableCell><Link to={`/cluster-queue/${queue.name}`}>{queue.name}</Link></TableCell>
-                  <TableCell><Link to={`/cohort/${queue.cohort}`}>{queue.cohort || '-' }</Link></TableCell>
+                  <TableCell><Link to={`/cohort/${queue.cohort}`}>{queue.cohort || '' }</Link></TableCell>
                   <TableCell>
                     {queue.flavors.map((flavor, index) => (
                       <React.Fragment key={flavor}>
