@@ -105,7 +105,7 @@ const Dashboard = () => {
             <TableRow>
               <TableCell>Name</TableCell>
               <TableCell>Queue Name</TableCell>
-              <TableCell>Status</TableCell>
+              <TableCell>Admission Status</TableCell>
               <TableCell>Preempted</TableCell>
               <TableCell>Preemption Reason</TableCell>
               <TableCell>Priority</TableCell>
@@ -136,7 +136,16 @@ const Dashboard = () => {
                   </Tooltip>
                 </TableCell>
                 <TableCell><Link to={`/local-queue/${workload.spec.queueName}`}>{workload.spec.queueName}</Link></TableCell>
-                <TableCell>{workload.status?.state || "Unknown"}</TableCell>
+                <TableCell>
+                  {(() => {
+                    const admittedCondition = workload.status?.conditions?.find(cond => cond.type === "Admitted");
+                    if (admittedCondition) {
+                      const admissionStatus = admittedCondition.status === "True" ? "Admitted" : "Not admitted";
+                      return `${admissionStatus}: ${admittedCondition.reason}`;
+                    }
+                    return "Unknown";
+                  })()}
+                </TableCell>
                 <TableCell>{workload.preemption?.preempted ? "Yes" : "No"}</TableCell>
                 <TableCell>{workload.preemption?.reason || "N/A"}</TableCell>
                 <TableCell>{workload.spec.priority}</TableCell>
