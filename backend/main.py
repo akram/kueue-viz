@@ -184,3 +184,12 @@ async def websocket_local_queue_details(websocket: WebSocket, queue_name: str):
 async def websocket_local_queue_workloads(websocket: WebSocket, queue_name: str):
     await websocket_handler(websocket, lambda: get_admitted_workloads(queue_name), f"/ws/local-queue/{queue_name}/workloads")
 
+@app.websocket("/ws/cohorts")
+async def websocket_cohorts(websocket: WebSocket):
+        await websocket_handler(websocket, get_cohorts,"/ws/cohorts")
+
+
+@app.websocket("/ws/cohort/{cohort_name}")
+async def websocket_cohort_details(websocket: WebSocket, cohort_name: str):
+    await websocket_handler(websocket, lambda: get_cohort_details(cohort_name),f"/ws/cohort/{cohort_name}")
+
