@@ -1,4 +1,4 @@
-import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, Typography } from '@mui/material';
+import { CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
@@ -8,16 +8,17 @@ const Workloads = () => {
   const { data: data, error } = useWebSocket('ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/kueue');
   const [workloads, setWorkloads] = useState([]);
   useEffect(() => {
-      setWorkloads(data?.workloads?.items || []);
+    setWorkloads(data?.workloads?.items || []);
   }, [data]);
 
   if (error) return <Typography color="error">{error}</Typography>;
   return (
-    <>
+    <Paper style={{ padding: '16px', marginTop: '20px' }}>
       {/* Display a table with workload details */}
-      <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>
-        Workloads
-      </Typography>
+      <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>Workloads</Typography>
+      {workloads.length === 0 ? (
+        <CircularProgress />
+      ) : (
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -65,7 +66,8 @@ const Workloads = () => {
           </TableBody>
         </Table>
       </TableContainer>
-    </>
+      )}
+    </Paper>
   );
 };
 

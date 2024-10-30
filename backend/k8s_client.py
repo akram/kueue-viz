@@ -369,24 +369,27 @@ def get_cluster_queue_details(cluster_queue_name: str):
 
 def get_cohorts():
     """
-    Retrieves a list of unique cohorts from all cluster queues.
+    Retrieves a list of unique cohorts from all cluster queues, including the cluster queues participating in each cohort.
     """
     try:
+        # Retrieve all cluster queues
         cluster_queues = k8s_api.list_cluster_custom_object(
             group="kueue.x-k8s.io",
             version="v1beta1",
             plural="clusterqueues"
         )
 
-        # Extract unique cohort names
-        cohorts = set(
-            queue.get("spec", {}).get("cohort", None)
-            for queue in cluster_queues.get("items", [])
-            if queue.get("spec", {}).get("cohort")
-        )
+        # Organize cluster queues by cohort
+        cohorts = {}
+        for queue in cluster_queues.get("items", []):
+            cohort_name = queue.get("spec", {}).get("cohort")
+            if cohort_name:
+                if cohort_name not in cohorts:
+                    cohorts[cohort_name] = {"name": cohort_name, "clusterQueues": []}
+                cohorts[cohort_name]["clusterQueues"].append({"name": queue["metadata"]["name"]})
 
-        # Return cohorts as a list of dictionaries
-        return [{"name": cohort} for cohort in cohorts if cohort]
+        # Convert the dictionary to a list
+        return list(cohorts.values())
 
     except client.ApiException as e:
         print(f"Error fetching cohorts: {e}")

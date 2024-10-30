@@ -11,6 +11,7 @@ import ResourceFlavorDetail from './ResourceFlavorDetail';
 import ResourceFlavors from './ResourceFlavors';
 import WorkloadDetail from './WorkloadDetail';
 import Workloads from './Workloads';
+import ClusterQueueDetail from './ClusterQueueDetail';
 
 const App = () => {
   return (
@@ -27,7 +28,7 @@ const App = () => {
 
         <Route path="/workload/:workloadName" element={<WorkloadDetail />} />
         <Route path="/local-queue/:queueName" element={<LocalQueueDetail />} />
-        <Route path="/cluster-queue/:clusterQueueName" element={<WorkloadDetail />} />
+        <Route path="/cluster-queue/:clusterQueueName" element={<ClusterQueueDetail />} />
         <Route path="/resource-flavor/:flavorName" element={<ResourceFlavorDetail />} />
         <Route path="/cohort/:cohortName" element={<CohortDetail />} />
 
