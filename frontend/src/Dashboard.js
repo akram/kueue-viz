@@ -108,7 +108,6 @@ const Dashboard = () => {
               <TableCell>Admission Status</TableCell>
               <TableCell>Cluster Queue Admission</TableCell>
               <TableCell>Preempted</TableCell>
-              <TableCell>Preemption Reason</TableCell>
               <TableCell>Priority</TableCell>
               <TableCell>Priority Class Name</TableCell>
             </TableRow>
@@ -148,8 +147,15 @@ const Dashboard = () => {
                   })()}
                 </TableCell>
                 <TableCell>{workload.status?.admission?.clusterQueue}</TableCell>
-                <TableCell>{workload.preemption?.preempted ? "Yes" : "No"}</TableCell>
-                <TableCell>{workload.preemption?.reason || "N/A"}</TableCell>
+                <TableCell>
+                  {(() => {
+                    const evictedCondition = workload.status?.conditions?.find(cond => cond.type === "Evicted" && cond.status === "True");
+                    if (evictedCondition) {
+                      return `Yes: ${evictedCondition.reason}`;
+                    }
+                    return "No";
+                  })()}
+                </TableCell>
                 <TableCell>{workload.spec.priority}</TableCell>
                 <TableCell>{workload.spec.priorityClassName}</TableCell>
               </TableRow>
