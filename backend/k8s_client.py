@@ -17,7 +17,9 @@ __all__ = [
     "get_resource_flavor_details",
     "get_admitted_workloads",
     "get_local_queue_details",
-    "get_cluster_queue_details"
+    "get_cluster_queue_details",
+    "get_cohorts",
+    "get_cohort_details"
 ]
 
 # Determine the namespace dynamically from the mounted file
