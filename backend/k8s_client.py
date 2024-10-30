@@ -4,6 +4,8 @@ from kubernetes import client, config
 # Load Kubernetes configuration for in-cluster access
 config.load_incluster_config()
 k8s_api = client.CustomObjectsApi()
+core_api = client.CoreV1Api()
+
 
 # Determine the namespace dynamically from the mounted file
 def get_namespace():
@@ -63,9 +65,6 @@ def get_cluster_queues():
         print(f"Error fetching cluster queues: {e}")
         return []
 
-
-
-
 def get_queues():
     try:
         queues = k8s_api.list_namespaced_custom_object(
@@ -103,7 +102,51 @@ def get_workloads():
         print(f"Error fetching workloads: {e.status} {e.reason} - {e.body}")
         return {"error": e.body}
 
+def get_workload_by_name(workload_name: str):
+    try:
+        workload = k8s_api.get_namespaced_custom_object(
+            group="kueue.x-k8s.io",
+            version="v1beta1",
+            namespace=namespace,
+            plural="workloads",
+            name=workload_name
+        )
+        # Add preemption details if available
+        preempted = workload.get('status', {}).get('preempted', False)
+        preemption_reason = workload.get('status', {}).get('preemptionReason', 'None')
 
+        workload['preemption'] = {
+            'preempted': preempted,
+            'reason': preemption_reason
+        }
+
+        return workload
+    except client.ApiException as e:
+        print(f"Error fetching workload {workload_name}: {e}")
+        return None
+
+def get_events_by_workload_name(workload_name: str):
+    """
+    Retrieves events related to the given workload.
+    """
+    try:
+        events = core_api.list_namespaced_event(
+            namespace=namespace,
+            field_selector=f"involvedObject.name={workload_name}"
+        )
+        return [
+            {
+                "name": event.metadata.name,
+                "reason": event.reason,
+                "message": event.message,
+                "timestamp": event.last_timestamp.isoformat() if event.last_timestamp else None,
+                "type": event.type,
+            }
+            for event in events.items
+        ]
+    except client.ApiException as e:
+        print(f"Error fetching events for workload {workload_name}: {e}")
+        return []
 
 def get_queue_status(namespace: str = "default"):
     """
@@ -117,3 +160,5 @@ def get_queue_status(namespace: str = "default"):
         "queues": get_queues(namespace),
         "workloads": get_workloads(namespace)
     }
+
+

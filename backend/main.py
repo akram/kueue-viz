@@ -3,11 +3,10 @@ import asyncio
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, List, Callable
-from k8s_client import get_queues, get_workloads, get_local_queues, get_cluster_queues
+from k8s_client import get_queues, get_workloads, get_local_queues, get_cluster_queues, get_workload_by_name,get_events_by_workload_name
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Kueue Visualization API", version="1.0")
-
 frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")  # Default to localhost for local testing
 
 # Allow CORS for the frontend origin
@@ -64,6 +63,19 @@ async def get_cluster_queues_endpoint():
     """
     return get_cluster_queues()  # Calls the function defined in k8s_client
 
+
+@app.get("/kueue/workload/{workload_name}")
+async def get_workload_detail(workload_name: str):
+    workload = get_workload_by_name(workload_name)
+    if workload is None:
+        raise HTTPException(status_code=404, detail="Workload not found")
+    return workload
+
+
+@app.get("/kueue/workload/{workload_name}/events")
+async def get_workload_events(workload_name: str):
+    events = get_events_by_workload_name(workload_name)
+    return events
 
 # Generic WebSocket setup
 class ConnectionManager:
@@ -129,3 +141,22 @@ async def websocket_local_queues(websocket: WebSocket):
 @app.websocket("/ws/cluster-queues")
 async def websocket_cluster_queues(websocket: WebSocket):
     await websocket_handler(websocket, get_cluster_queues, "/ws/cluster-queues")
+
+# New WebSocket endpoint for individual workload updates
+@app.websocket("/ws/workload/{workload_name}")
+async def websocket_workload(websocket: WebSocket, workload_name: str):
+    await websocket_handler(websocket, lambda: get_workload_by_name(workload_name), f"/ws/workload/{workload_name}")
+
+@app.websocket("/ws/workload/{workload_name}/events")
+async def websocket_workload_events(websocket: WebSocket, workload_name: str):
+    await manager.connect(websocket, f"/ws/workload/{workload_name}/events")
+    try:
+        while True:
+            events = get_events_by_workload_name(workload_name)
+            await manager.broadcast(events, f"/ws/workload/{workload_name}/events")
+            await asyncio.sleep(5)  # Polling interval for new events
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, f"/ws/workload/{workload_name}/events")
+    except Exception as e:
+        print(f"Unhandled exception in WebSocket events endpoint for {workload_name}: {e}")
+        manager.disconnect(websocket, f"/ws/workload/{workload_name}/events")

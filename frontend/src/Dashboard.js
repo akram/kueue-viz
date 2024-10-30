@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, Typography } from '@mui/material';
 import axios from 'axios';
-import { Grid, Paper, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -23,10 +24,8 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    // Initial data fetch with Axios as a fallback if WebSocket is not supported
     const fetchData = async () => {
       try {
-        // const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/kueue/status`);
         const response = await axios.get('http://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/kueue/status');
         processWorkloadData(response.data);
       } catch (error) {
@@ -39,8 +38,7 @@ const Dashboard = () => {
 
     fetchData();
 
-    // Set up WebSocket connection for real-time updates
-    const ws = new WebSocket(`http://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/kueue`);
+    const ws = new WebSocket(`ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/kueue`);
 
     ws.onopen = () => {
       console.log("Connected to WebSocket");
@@ -61,7 +59,6 @@ const Dashboard = () => {
       console.log("WebSocket connection closed");
     };
 
-    // Clean up WebSocket connection on component unmount
     return () => {
       ws.close();
     };
@@ -111,16 +108,39 @@ const Dashboard = () => {
               <TableCell>Status</TableCell>
               <TableCell>Preempted</TableCell>
               <TableCell>Preemption Reason</TableCell>
+              <TableCell>Priority</TableCell>
+              <TableCell>Priority Class Name</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {workloads.map(workload => (
               <TableRow key={workload.metadata.name}>
-                <TableCell>{workload.metadata.name}</TableCell>
+                <TableCell>
+                  <Tooltip
+                    title={
+                      <div>
+                        <div><strong>Pod Sets Count:</strong> {workload.spec?.podSets?.[0]?.count || 'N/A'}</div>
+                        <div><strong>Owner Reference: {workload.ownerReferences?.[0]?.uid || 'N/A'}</strong></div>
+                        <div>API Version: {workload.ownerReferences?.[0]?.apiVersion || 'N/A'}</div>
+                        <div>Kind: {workload.ownerReferences?.[0]?.kind || 'N/A'}</div>
+                        <div>Name: {workload.ownerReferences?.[0]?.name || 'N/A'}</div>
+                      </div>
+                    }
+                    arrow
+                  >
+                    <Link to={`/workload/${workload.metadata.name}`}>
+                      <span style={{ cursor: 'pointer', textDecoration: 'underline', color: 'blue' }}>
+                        {workload.metadata.name}
+                      </span>
+                    </Link>
+                  </Tooltip>
+                </TableCell>
                 <TableCell>{workload.spec.queueName}</TableCell>
                 <TableCell>{workload.status?.state || "Unknown"}</TableCell>
                 <TableCell>{workload.preemption?.preempted ? "Yes" : "No"}</TableCell>
                 <TableCell>{workload.preemption?.reason || "N/A"}</TableCell>
+                <TableCell>{workload.spec.priority}</TableCell>
+                <TableCell>{workload.spec.priorityClassName}</TableCell>
               </TableRow>
             ))}
           </TableBody>
