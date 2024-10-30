@@ -143,7 +143,7 @@ const Dashboard = () => {
                       const admissionStatus = admittedCondition.status === "True" ? "Admitted" : "Not admitted";
                       return `${admissionStatus}: ${admittedCondition.reason}`;
                     }
-                    return "Unknown";
+                    return "Pending";
                   })()}
                 </TableCell>
                 <TableCell>{workload.preemption?.preempted ? "Yes" : "No"}</TableCell>
