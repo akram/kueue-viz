@@ -27,14 +27,16 @@ const LocalQueues = () => {
             <TableHead>
               <TableRow>
                 <TableCell>Name</TableCell>
-                <TableCell>Status</TableCell>
+                <TableCell>Pending Workloads</TableCell>
+                <TableCell>Reserving Workloads</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {queues.map((queue) => (
                 <TableRow key={queue.name}>
                   <TableCell><Link to={`/local-queue/${queue.name}`}>{queue.name}</Link></TableCell>
-                  <TableCell>{queue.status}</TableCell>
+                  <TableCell>{queue.pendingWorkloads}</TableCell>
+                  <TableCell>{queue.reservingWorkloads}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

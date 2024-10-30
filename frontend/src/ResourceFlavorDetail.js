@@ -50,16 +50,21 @@ const ResourceFlavorDetail = () => {
             </TableHead>
             <TableBody>
               {flavor.queues?.map((queue) => (
-                queue.quota.map((resource, index) => (
-                  <TableRow key={`${queue.queueName}-${resource.resource}-${index}`}>
-                    <TableCell>{queue.queueName}</TableCell>
-                    <TableCell>{resource.resource}</TableCell>
-                    <TableCell>{resource.nominalQuota}</TableCell>
+                <React.Fragment key={queue.queueName}>
+                  <TableRow>
+                    <TableCell rowSpan={queue.quota.length}>{queue.queueName}</TableCell>
+                    <TableCell>{queue.quota[0].resource}</TableCell>
+                    <TableCell>{queue.quota[0].nominalQuota}</TableCell>
                   </TableRow>
-                ))
+                  {queue.quota.slice(1).map((resource, index) => (
+                    <TableRow key={`${queue.queueName}-${resource.resource}-${index}`}>
+                      <TableCell>{resource.resource}</TableCell>
+                      <TableCell>{resource.nominalQuota}</TableCell>
+                    </TableRow>
+                  ))}
+                </React.Fragment>
               ))}
-            </TableBody>
-          </Table>
+            </TableBody>          </Table>
         </TableContainer>
       )}
     </Paper>

@@ -315,7 +315,7 @@ def get_admitted_workloads(queue_name: str):
                 "status": workload.get("status", {}),
             }
             for workload in workloads.get("items", [])
-            if workload.get("status", {}).get("admission", {}).get("queueName") == queue_name
+            if workload.get("spec", {}).get("queueName") == queue_name
         ]
 
         return admitted_workloads
