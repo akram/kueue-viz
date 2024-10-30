@@ -1,19 +1,19 @@
-import { CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, CircularProgress } from '@mui/material';
 import useWebSocket from './useWebSocket';
 
 const ClusterQueueDetail = () => {
   const { clusterQueueName } = useParams();
   const url = `ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/cluster-queue/${clusterQueueName}`;
-
   const { data: clusterQueueData, error } = useWebSocket(url);
-
   const [clusterQueue, setClusterQueue] = useState(null);
 
   useEffect(() => {
     console.log("Received clusterQueue data:", clusterQueueData); // Debug line
-    if (clusterQueueData) setClusterQueue(clusterQueueData);
+    if (clusterQueueData ) {
+      setClusterQueue(clusterQueueData);
+    }
   }, [clusterQueueData]);
 
   if (error) return <Typography color="error">{error}</Typography>;

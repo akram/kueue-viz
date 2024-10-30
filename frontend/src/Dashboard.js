@@ -70,10 +70,10 @@ const Dashboard = () => {
   return (
     <>
       <ToastContainer />
-      <Grid container spacing={3}>
+      <Grid container spacing={4}>
         <Grid item xs={12} sm={6} md={4}>
           <Paper elevation={3} style={{ padding: '16px' }}>
-            <Typography variant="h6">Total Local Queues</Typography>
+            <Typography variant="h6">Total Cluster Local Queues</Typography>
             <Typography variant="h3">{queues.length}</Typography>
           </Paper>
         </Grid>
@@ -135,7 +135,7 @@ const Dashboard = () => {
                     </Link>
                   </Tooltip>
                 </TableCell>
-                <TableCell>{workload.spec.queueName}</TableCell>
+                <TableCell><Link to={`/local-queue/${workload.spec.queueName}`}>{workload.spec.queueName}</Link></TableCell>
                 <TableCell>{workload.status?.state || "Unknown"}</TableCell>
                 <TableCell>{workload.preemption?.preempted ? "Yes" : "No"}</TableCell>
                 <TableCell>{workload.preemption?.reason || "N/A"}</TableCell>

@@ -3,7 +3,7 @@ import asyncio
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, List, Callable
-from k8s_client import get_queues, get_workloads, get_local_queues, get_cluster_queues, get_workload_by_name,get_events_by_workload_name
+from k8s_client import *
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Kueue Visualization API", version="1.0")
@@ -40,13 +40,14 @@ async def get_kueue_status():
     """
     queues = get_queues()
     workloads = get_workloads()
+    flavors = get_resource_flavors()
 
     # Combine errors if resources are not found
-    if "error" in queues or "error" in workloads:
-        error_message = queues.get("error", "") + workloads.get("error", "")
+    if "error" in queues or "error" in workloads or "error" in flavors :
+        error_message = queues.get("error", "") + workloads.get("error", "") + flavors.get("error", "")
         return {"error": error_message}
 
-    return {"queues": queues, "workloads": workloads}
+    return {"queues": queues, "workloads": workloads, "flavors": flavors}
 
 
 @app.get("/local-queues", response_model=List[LocalQueue])
@@ -128,11 +129,11 @@ async def websocket_handler(websocket: WebSocket, data_fetcher: Callable, endpoi
 
 @app.websocket("/ws/kueue")
 async def websocket_kueue(websocket: WebSocket):
-    await websocket_handler(websocket, lambda: {"queues": get_queues(), "clusterQueues": get_cluster_queues(), "workloads": get_workloads()}, "/ws/kueue")
+    await websocket_handler(websocket, lambda: {"queues": get_queues(), "clusterQueues": get_cluster_queues(), "workloads": get_workloads(), "flavors": get_resource_flavors()}, "/ws/kueue")
 
 @app.websocket("/ws/workloads")
 async def websocket_kueue(websocket: WebSocket):
-    await websocket_handler(websocket,  get_workloads(), "/ws/workloads")
+    await websocket_handler(websocket,  lambda: {"workloads": get_workloads()}, "/ws/workloads")
 
 @app.websocket("/ws/local-queues")
 async def websocket_local_queues(websocket: WebSocket):
@@ -141,6 +142,12 @@ async def websocket_local_queues(websocket: WebSocket):
 @app.websocket("/ws/cluster-queues")
 async def websocket_cluster_queues(websocket: WebSocket):
     await websocket_handler(websocket, get_cluster_queues, "/ws/cluster-queues")
+
+@app.websocket("/ws/cluster-queue/{cluster_queue_name}")
+async def websocket_resource_flavor_details(websocket: WebSocket, cluster_queue_name: str):
+    await websocket_handler(websocket, lambda: get_cluster_queue_details(cluster_queue_name), f"/ws/cluster-queue/{cluster_queue_name}")
+
+
 
 # New WebSocket endpoint for individual workload updates
 @app.websocket("/ws/workload/{workload_name}")
@@ -160,3 +167,20 @@ async def websocket_workload_events(websocket: WebSocket, workload_name: str):
     except Exception as e:
         print(f"Unhandled exception in WebSocket events endpoint for {workload_name}: {e}")
         manager.disconnect(websocket, f"/ws/workload/{workload_name}/events")
+
+@app.websocket("/ws/resource-flavors")
+async def websocket_resource_flavors(websocket: WebSocket):
+    await websocket_handler(websocket, get_resource_flavors, "/ws/resource-flavors")
+
+@app.websocket("/ws/resource-flavor/{flavor_name}")
+async def websocket_resource_flavor_details(websocket: WebSocket, flavor_name: str):
+    await websocket_handler(websocket, lambda: get_resource_flavor_details(flavor_name), f"/ws/resource-flavor/{flavor_name}")
+
+@app.websocket("/ws/local-queue/{queue_name}")
+async def websocket_local_queue_details(websocket: WebSocket, queue_name: str):
+    await websocket_handler(websocket, lambda: get_local_queue_details(queue_name), f"/ws/local-queue/{queue_name}")
+
+@app.websocket("/ws/local-queue/{queue_name}/workloads")
+async def websocket_local_queue_workloads(websocket: WebSocket, queue_name: str):
+    await websocket_handler(websocket, lambda: get_admitted_workloads(queue_name), f"/ws/local-queue/{queue_name}/workloads")
+

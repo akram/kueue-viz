@@ -17,3 +17,18 @@ h2 {
 }
 
 
+.navbar-logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%; /* Makes the image circular */
+  margin-right: 16px; /* Space between the icon and the title */
+  background-color: white;
+}
+
+.navbar-link {
+  text-decoration: none;
+  color: white;
+  display: flex;
+  align-items: center;
+}
+
