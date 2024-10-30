@@ -146,15 +146,30 @@ const Dashboard = () => {
                     return "Pending";
                   })()}
                 </TableCell>
-                <TableCell>{workload.status?.admission?.clusterQueue}</TableCell>
                 <TableCell>
-                  {(() => {
-                    const evictedCondition = workload.status?.conditions?.find(cond => cond.type === "Evicted" && cond.status === "True");
-                    if (evictedCondition) {
-                      return `Yes: ${evictedCondition.reason}`;
+                  <Link to={`/cluster-queue/${workload.status?.admission?.clusterQueue}`}>{workload.status?.admission?.clusterQueue}</Link>
+                </TableCell>
+                <TableCell>
+                  <Tooltip
+                    title={
+                      <div>
+                        <div><strong>Message:</strong> {workload.status?.conditions?.find(cond => cond.type === "Evicted")?.message || 'N/A'}</div>
+                      </div>
                     }
-                    return "No";
-                  })()}
+                    arrow
+                  >
+                    <Link to={`/workload/${workload.metadata.name}`}>
+                      <span style={{ cursor: 'pointer', textDecoration: 'underline', color: 'blue' }}>
+                      {(() => {
+                        const evictedCondition = workload.status?.conditions?.find(cond => cond.type === "Evicted" && cond.status === "True");
+                        if (evictedCondition) {
+                          return `Yes: ${evictedCondition.reason}`;
+                        }
+                        return "No";
+                      })()}
+                      </span>
+                    </Link>
+                  </Tooltip>
                 </TableCell>
                 <TableCell>{workload.spec.priority}</TableCell>
                 <TableCell>{workload.spec.priorityClassName}</TableCell>
