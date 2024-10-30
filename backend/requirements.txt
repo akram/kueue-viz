@@ -1,0 +1,6 @@
+fastapi
+kubernetes
+fastapi-cors
+uvicorn
+uvicorn[standard]
+
