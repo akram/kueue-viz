@@ -1,4 +1,4 @@
-import { CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { CircularProgress, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import useWebSocket from './useWebSocket';
@@ -31,34 +31,38 @@ const ClusterQueueDetail = () => {
   return (
     <Paper style={{ padding: '16px', marginTop: '20px' }}>
       <Typography variant="h4" gutterBottom>Cluster Queue Detail: {clusterQueueName}</Typography>
-      <Typography variant="body1"><strong>Details:</strong> {JSON.stringify(clusterQueue.details)}</Typography>
-
+      <Typography variant="body1"><strong>Details:</strong> {JSON.stringify(clusterQueue.spec)}</Typography>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={6}>
+          <Typography variant="body1"><strong>Name:</strong> {clusterQueue.metadata?.name}</Typography>
+          <Typography variant="body1"><strong>UID:</strong> {clusterQueue.metadata?.uid}</Typography>
+          <Typography variant="body1"><strong>Creation Timestamp:</strong> {new Date(clusterQueue.metadata?.creationTimestamp).toLocaleString()}</Typography>
+        </Grid>
+      </Grid>
       <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>
-        Queues Using This Flavor
+        Local Queues Using This Cluster Queue
       </Typography>
       {clusterQueue.queues && clusterQueue.queues.length === 0 ? (
-        <Typography>No queues are using this clusterQueue.</Typography>
+        <Typography>No local queues are using this clusterQueue.</Typography>
       ) : (
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
               <TableRow>
                 <TableCell>Queue Name</TableCell>
-                <TableCell>Resource</TableCell>
-                <TableCell>Nominal Quota</TableCell>
+                <TableCell>Reservation</TableCell>
+                <TableCell>Usage</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {clusterQueue.queues?.map((queue) => (
-                queue.quota.map((resource, index) => (
-                  <TableRow key={`${queue.queueName}-${resource.resource}-${index}`}>
-                    <TableCell>{queue.queueName}</TableCell>
-                    <TableCell>{resource.resource}</TableCell>
-                    <TableCell>{resource.nominalQuota}</TableCell>
-                  </TableRow>
-                ))
-              ))}
-            </TableBody>
+            {clusterQueue.queues.map((queue) => (
+              <TableRow>
+                <TableCell>{queue.name}</TableCell>
+                <TableCell>{JSON.stringify(queue.reservation)}</TableCell>
+                <TableCell>{JSON.stringify(queue.usage)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
           </Table>
         </TableContainer>
       )}

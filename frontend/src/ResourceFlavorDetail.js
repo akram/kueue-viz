@@ -64,7 +64,8 @@ const ResourceFlavorDetail = () => {
                   ))}
                 </React.Fragment>
               ))}
-            </TableBody>          </Table>
+            </TableBody>
+          </Table>
         </TableContainer>
       )}
     </Paper>

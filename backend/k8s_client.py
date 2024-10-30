@@ -49,7 +49,7 @@ def get_local_queues():
             {
                 "name": item["metadata"]["name"],
                 "status": item["status"],
-                # Add more fields as required
+                    # Add more fields as required
             }
             for item in local_queues.get("items", [])
         ]
@@ -345,21 +345,23 @@ def get_cluster_queue_details(cluster_queue_name: str):
             plural="localqueues"
         )
 
-        # Filter local queues that use this cluster queue and get quotas
+        # Gather names of local queues that use this cluster queue
         queues_using_cluster_queue = [
             {
-                "queueName": queue["metadata"]["name"],
-                "quota": queue.get("spec", {}).get("quota", [])
+                "name": queue["metadata"]["name"],
+                "reservation": queue.get("status", {}).get("flavorsReservation"),
+                "usage": queue.get("status", {}).get("flavorUsage")
             }
             for queue in local_queues.get("items", [])
             if queue.get("spec", {}).get("clusterQueue") == cluster_queue_name
         ]
 
-        return {
-            "name": cluster_queue["metadata"]["name"],
-            "details": cluster_queue.get("spec", {}),
+        # Attach the `queues` information to the returned data
+        cluster_queue_details = {
+            **cluster_queue,
             "queues": queues_using_cluster_queue
         }
+        return cluster_queue_details
 
     except client.ApiException as e:
         print(f"Error fetching details for cluster queue {cluster_queue_name}: {e}")
