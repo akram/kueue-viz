@@ -71,6 +71,7 @@ def get_cluster_queues():
             {
                 "name": queue["metadata"]["name"],
                 "cohort": queue["spec"]["cohort"],
+                "resourceGroups": queue["spec"]["resourceGroups"],
                 "flavors": [
                     flavor["name"]
                     for resource_group in queue.get("spec", {}).get("resourceGroups", [])

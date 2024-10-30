@@ -36,6 +36,65 @@ const ClusterQueueDetail = () => {
         </Grid>
       </Grid>
 
+
+
+      {/* Resource Groups Section */}
+      <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>
+        Resource Groups
+      </Typography>
+      
+      {clusterQueue.resourceGroups && clusterQueue.resourceGroups.length === 0 ? (
+        <Typography>No resource groups defined for this cluster queue.</Typography>
+      ) : (
+        <TableContainer component={Paper} style={{ marginTop: '20px' }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Covered Resources</TableCell>
+                <TableCell>Flavor</TableCell>
+                <TableCell>Resource</TableCell>
+                <TableCell>Nominal Quota</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {clusterQueue.spec.resourceGroups.map((group, groupIndex) => (
+                <React.Fragment key={`resourceGroup-${groupIndex}`}>
+                  {group.flavors.map((flavor, flavorIndex) => (
+                    <React.Fragment key={`${groupIndex}-${flavor.name}`}>
+                      {flavor.resources.map((resource, resourceIndex) => (
+                        <TableRow key={`${groupIndex}-${flavor.name}-${resource.name}`}>
+                          {/* Display Covered Resources with rowSpan across all flavors and resources in this group */}
+                          {flavorIndex === 0 && resourceIndex === 0 && (
+                            <TableCell rowSpan={group.flavors.reduce((acc, f) => acc + f.resources.length, 0)}>
+                              {group.coveredResources.join(', ')}
+                            </TableCell>
+                          )}
+
+                          {/* Display Flavor Name with rowSpan across its resources */}
+                          {resourceIndex === 0 && (
+                            <TableCell rowSpan={flavor.resources.length}>
+                              {flavor.name}
+                            </TableCell>
+                          )}
+
+                          {/* Display Resource Name and Nominal Quota */}
+                          <TableCell>{resource.name}</TableCell>
+                          <TableCell>{resource.nominalQuota}</TableCell>
+                        </TableRow>
+                      ))}
+                    </React.Fragment>
+                  ))}
+                </React.Fragment>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+
+
+
+
+
       <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>
         Local Queues Using This Cluster Queue
       </Typography>
