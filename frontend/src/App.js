@@ -1,14 +1,16 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Dashboard from './Dashboard';
-import LocalQueues from './LocalQueues';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import ClusterQueues from './ClusterQueues';
-import ResourceFlavors from './ResourceFlavors';
-import ResourceFlavorDetail from './ResourceFlavorDetail';
-import Workloads from './Workloads';
-import WorkloadDetail from './WorkloadDetail';
+import CohortDetail from './CohortDetail';
+import Cohorts from './Cohorts';
+import Dashboard from './Dashboard';
 import LocalQueueDetail from './LocalQueueDetail';
+import LocalQueues from './LocalQueues';
 import Navbar from './Navbar';
+import ResourceFlavorDetail from './ResourceFlavorDetail';
+import ResourceFlavors from './ResourceFlavors';
+import WorkloadDetail from './WorkloadDetail';
+import Workloads from './Workloads';
 
 const App = () => {
   return (
@@ -20,11 +22,15 @@ const App = () => {
         <Route path="/local-queues" element={<LocalQueues />} />
         <Route path="/cluster-queues" element={<ClusterQueues />} />
         <Route path="/resource-flavors" element={<ResourceFlavors />} />
+        <Route path="/cohorts" element={<Cohorts />} />
+
 
         <Route path="/workload/:workloadName" element={<WorkloadDetail />} />
         <Route path="/local-queue/:queueName" element={<LocalQueueDetail />} />
         <Route path="/cluster-queue/:clusterQueueName" element={<WorkloadDetail />} />
         <Route path="/resource-flavor/:flavorName" element={<ResourceFlavorDetail />} />
+        <Route path="/cohort/:cohortName" element={<CohortDetail />} />
+
       </Routes>
     </Router>
   );

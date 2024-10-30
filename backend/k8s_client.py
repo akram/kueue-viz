@@ -17,7 +17,9 @@ __all__ = [
     "get_resource_flavor_details",
     "get_admitted_workloads",
     "get_local_queue_details",
-    "get_cluster_queue_details"
+    "get_cluster_queue_details",
+    "get_cohorts",
+    "get_cohort_details"
 ]
 
 # Determine the namespace dynamically from the mounted file
@@ -68,6 +70,7 @@ def get_cluster_queues():
         return [
             {
                 "name": queue["metadata"]["name"],
+                "cohort": queue["spec"]["cohort"],
                 "flavors": [
                     flavor["name"]
                     for resource_group in queue.get("spec", {}).get("resourceGroups", [])
@@ -360,4 +363,63 @@ def get_cluster_queue_details(cluster_queue_name: str):
 
     except client.ApiException as e:
         print(f"Error fetching details for cluster queue {cluster_queue_name}: {e}")
+        return None
+
+
+
+def get_cohorts():
+    """
+    Retrieves a list of unique cohorts from all cluster queues.
+    """
+    try:
+        cluster_queues = k8s_api.list_cluster_custom_object(
+            group="kueue.x-k8s.io",
+            version="v1beta1",
+            plural="clusterqueues"
+        )
+
+        # Extract unique cohort names
+        cohorts = set(
+            queue.get("spec", {}).get("cohort", None)
+            for queue in cluster_queues.get("items", [])
+            if queue.get("spec", {}).get("cohort")
+        )
+
+        # Return cohorts as a list of dictionaries
+        return [{"name": cohort} for cohort in cohorts if cohort]
+
+    except client.ApiException as e:
+        print(f"Error fetching cohorts: {e}")
+        return []
+
+
+def get_cohort_details(cohort_name: str):
+    """
+    Retrieves details for a specific cohort, including all cluster queues in that cohort.
+    """
+    try:
+        cluster_queues = k8s_api.list_cluster_custom_object(
+            group="kueue.x-k8s.io",
+            version="v1beta1",
+            plural="clusterqueues"
+        )
+
+        # Filter cluster queues that are part of the specified cohort
+        cohort_cluster_queues = [
+            {
+                "name": queue["metadata"]["name"],
+                "spec": queue.get("spec", {}),
+                "status": queue.get("status", {})
+            }
+            for queue in cluster_queues.get("items", [])
+            if queue.get("spec", {}).get("cohort") == cohort_name
+        ]
+
+        return {
+            "cohort": cohort_name,
+            "clusterQueues": cohort_cluster_queues
+        }
+
+    except client.ApiException as e:
+        print(f"Error fetching details for cohort {cohort_name}: {e}")
         return None
