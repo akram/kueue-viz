@@ -106,6 +106,7 @@ const Dashboard = () => {
               <TableCell>Name</TableCell>
               <TableCell>Queue Name</TableCell>
               <TableCell>Admission Status</TableCell>
+              <TableCell>Cluster Queue Admission</TableCell>
               <TableCell>Preempted</TableCell>
               <TableCell>Preemption Reason</TableCell>
               <TableCell>Priority</TableCell>
@@ -146,6 +147,7 @@ const Dashboard = () => {
                     return "Pending";
                   })()}
                 </TableCell>
+                <TableCell>{workload.status?.admission?.clusterQueue}</TableCell>
                 <TableCell>{workload.preemption?.preempted ? "Yes" : "No"}</TableCell>
                 <TableCell>{workload.preemption?.reason || "N/A"}</TableCell>
                 <TableCell>{workload.spec.priority}</TableCell>
