@@ -186,7 +186,7 @@ async def websocket_local_queue_workloads(websocket: WebSocket, queue_name: str)
 
 @app.websocket("/ws/cohorts")
 async def websocket_cohorts(websocket: WebSocket):
-        await websocket_handler(websocket, get_cohorts,"/ws/cohorts")
+    await websocket_handler(websocket, get_cohorts,"/ws/cohorts")
 
 
 @app.websocket("/ws/cohort/{cohort_name}")
