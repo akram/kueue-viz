@@ -245,7 +245,7 @@ def get_resource_flavor_details(flavor_name: str):
     """
     try:
         # Fetch the specified resource flavor details
-        flavor = k8s_api.get_cluster_custom_object(
+        this_flavor = k8s_api.get_cluster_custom_object(
             group="kueue.x-k8s.io",
             version="v1beta1",
             plural="resourceflavors",
@@ -286,8 +286,8 @@ def get_resource_flavor_details(flavor_name: str):
         matching_nodes = get_nodes_for_flavor(flavor_name)
 
         return {
-            "name": flavor.get("metadata", {}).get("name", "Unknown Flavor"),
-            "details": flavor.get("spec", {}),
+            "name": flavor_name,
+            "details": this_flavor.get("spec", {}),
             "queues": queues_using_flavor,
             "nodes": matching_nodes
         }
