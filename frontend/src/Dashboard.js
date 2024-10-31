@@ -1,5 +1,4 @@
 import { Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, Typography, IconButton, Collapse } from '@mui/material';
-import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
@@ -11,7 +10,6 @@ const Dashboard = () => {
   const [queues, setQueues] = useState([]);
   const [workloads, setWorkloads] = useState([]);
   const [expandedRows, setExpandedRows] = useState({});
-  const [podsData, setPodsData] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -32,19 +30,11 @@ const Dashboard = () => {
     setLoading(false);
   }, [kueueData, kueueError]);
 
-  const toggleRow = (job_uid) => {
+  const toggleRow = (workloadName) => {
     setExpandedRows((prevExpandedRows) => ({
       ...prevExpandedRows,
-      [job_uid]: !prevExpandedRows[job_uid],
+      [workloadName]: !prevExpandedRows[workloadName],
     }));
-
-    if (!podsData[job_uid]) {
-      const { data: podData } = useWebSocket(`ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/workload/${job_uid}/pods`);
-      setPodsData((prevPodsData) => ({
-        ...prevPodsData,
-        [job_uid]: podData,
-      }));
-    }
   };
 
   if (loading) return <Typography variant="h6">Loading...</Typography>;
@@ -99,15 +89,18 @@ const Dashboard = () => {
           <TableBody>
             {workloads.map((workload) => {
               const podCount = workload.spec?.podSets?.reduce((sum, podSet) => sum + (podSet.count || 0), 0) || 0;
-              const job_uid = workload.metadata?.labels?.["kueue.x-k8s.io/job-uid"];
-              const isExpanded = expandedRows[job_uid];
-              const pods = podsData[job_uid] || [];
+              const isExpanded = expandedRows[workload.metadata.name];
+              const pods = workload.pods || [];
+
+              // Determine preemption status
+              const preemptedCondition = workload.status?.conditions?.find(cond => cond.type === "Evicted" && cond.status === "True");
+              const preemptedText = preemptedCondition ? `Yes: ${preemptedCondition.reason}` : "No";
 
               return (
                 <React.Fragment key={workload.metadata.name}>
                   <TableRow>
                     <TableCell>
-                      <IconButton onClick={() => toggleRow(job_uid)}>
+                      <IconButton onClick={() => toggleRow(workload.metadata.name)}>
                         {isExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
                       </IconButton>
                     </TableCell>
@@ -118,7 +111,21 @@ const Dashboard = () => {
                     </TableCell>
                     <TableCell>{podCount}</TableCell>
                     <TableCell><Link to={`/local-queue/${workload.spec.queueName}`}>{workload.spec.queueName}</Link></TableCell>
-                    {/* Add additional cells as needed */}
+                    <TableCell>
+                      {(() => {
+                        const admittedCondition = workload.status?.conditions?.find(cond => cond.type === "Admitted");
+                        const admissionStatus = admittedCondition && admittedCondition.status === "True" ? "Admitted" : "Not admitted";
+                        return `${admissionStatus}: ${admittedCondition?.reason || "N/A"}`;
+                      })()}
+                    </TableCell>
+                    <TableCell>
+                      <Link to={`/cluster-queue/${workload.status?.admission?.clusterQueue}`}>
+                        {workload.status?.admission?.clusterQueue || "N/A"}
+                      </Link>
+                    </TableCell>
+                    <TableCell>{preemptedText}</TableCell>
+                    <TableCell>{workload.spec.priority || "N/A"}</TableCell>
+                    <TableCell>{workload.spec.priorityClassName || "N/A"}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell colSpan={9} style={{ paddingBottom: 0, paddingTop: 0 }}>

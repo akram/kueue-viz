@@ -103,7 +103,11 @@ def get_queues():
         return {"error": e.body}
 
 def get_workloads():
+    """
+    Retrieves all workloads along with their attached pods based on job-uid.
+    """
     try:
+        # Retrieve all workloads
         workloads = k8s_api.list_namespaced_custom_object(
             group="kueue.x-k8s.io",
             version="v1beta1",
@@ -111,8 +115,29 @@ def get_workloads():
             plural="workloads"
         )
 
-        # Check if workloads are preempted and add preemption status/reason to each workload
+        # Retrieve all pods in the namespace
+        pods = core_api.list_namespaced_pod(namespace=namespace)
+
+        # Map pods by their `controller-uid` label for fast lookup
+        pod_map = {}
+        for pod in pods.items:
+            job_uid = pod.metadata.labels.get("controller-uid")
+            if job_uid:
+                pod_entry = {
+                    "name": pod.metadata.name,
+                    "status": pod.status.phase
+                }
+                if job_uid in pod_map:
+                    pod_map[job_uid].append(pod_entry)
+                else:
+                    pod_map[job_uid] = [pod_entry]
+
+        # Attach the corresponding pods to each workload
         for workload in workloads['items']:
+            job_uid = workload['metadata']['labels'].get("kueue.x-k8s.io/job-uid")
+            workload['pods'] = pod_map.get(job_uid, [])
+            
+            # Add preemption details if available
             preempted = workload.get('status', {}).get('preempted', False)
             preemption_reason = workload.get('status', {}).get('preemptionReason', 'None')
 
@@ -125,6 +150,7 @@ def get_workloads():
     except client.ApiException as e:
         print(f"Error fetching workloads: {e.status} {e.reason} - {e.body}")
         return {"error": e.body}
+
 
 def get_workload_by_name(workload_name: str):
     try:
