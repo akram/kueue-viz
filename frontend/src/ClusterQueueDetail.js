@@ -1,4 +1,4 @@
-import { CircularProgress, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { CircularProgress, Grid, Link, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import useWebSocket from './useWebSocket';
@@ -33,8 +33,8 @@ const ClusterQueueDetail = () => {
           <Typography variant="body1"><strong>Name:</strong> {clusterQueue.metadata?.name}</Typography>
           <Typography variant="body1"><strong>UID:</strong> {clusterQueue.metadata?.uid}</Typography>
           <Typography variant="body1"><strong>Creation Timestamp:</strong> {new Date(clusterQueue.metadata?.creationTimestamp).toLocaleString()}</Typography>
-          </Grid>
-          <Grid item xs={12} sm={6}>
+        </Grid>
+        <Grid item xs={12} sm={6}>
           <Typography variant="body1"><strong>Admitted Workloads:</strong> {clusterQueue.status?.admittedWorkloads}</Typography>
           <Typography variant="body1"><strong>Reserving Workloads:</strong> {clusterQueue.status?.reservingWorkloads}</Typography>
           <Typography variant="body1"><strong>Pending Workloads:</strong> {clusterQueue.status?.pendingWorkloads}</Typography>
@@ -47,7 +47,7 @@ const ClusterQueueDetail = () => {
       <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>
         Resource Groups
       </Typography>
-      
+
       {clusterQueue.resourceGroups && clusterQueue.resourceGroups.length === 0 ? (
         <Typography>No resource groups defined for this cluster queue.</Typography>
       ) : (
@@ -78,7 +78,7 @@ const ClusterQueueDetail = () => {
                           {/* Display Flavor Name with rowSpan across its resources */}
                           {resourceIndex === 0 && (
                             <TableCell rowSpan={flavor.resources.length}>
-                              {flavor.name}
+                              <Link to={`/resource-flavor/${flavor.name}`}>{flavor.name}</Link>
                             </TableCell>
                           )}
 
@@ -103,7 +103,7 @@ const ClusterQueueDetail = () => {
       <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>
         Local Queues Using This Cluster Queue
       </Typography>
-      
+
       {clusterQueue.queues && clusterQueue.queues.length === 0 ? (
         <Typography>No local queues are using this cluster queue.</Typography>
       ) : (
@@ -135,7 +135,7 @@ const ClusterQueueDetail = () => {
                           {/* Display Flavor Name with rowSpan across its resources */}
                           {resResourceIndex === 0 && (
                             <TableCell rowSpan={reservation.resources?.length || 1}>
-                              {reservation.name}
+                              <Link to={`/resource-flavor/${reservation.name}`}>{reservation.name}</Link>
                             </TableCell>
                           )}
 
