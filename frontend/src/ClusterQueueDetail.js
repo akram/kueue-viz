@@ -27,65 +27,115 @@ const ClusterQueueDetail = () => {
 
   return (
     <Paper style={{ padding: '16px', marginTop: '20px' }}>
-    <Typography variant="h4" gutterBottom>Cluster Queue Detail: {clusterQueueName}</Typography>
-    
-    <Grid container spacing={2}>
-      <Grid item xs={12} sm={6}>
-        <Typography variant="body1"><strong>Name:</strong> {clusterQueue.metadata?.name}</Typography>
-        <Typography variant="body1"><strong>UID:</strong> {clusterQueue.metadata?.uid}</Typography>
-        <Typography variant="body1"><strong>Creation Timestamp:</strong> {new Date(clusterQueue.metadata?.creationTimestamp).toLocaleString()}</Typography>
-      </Grid>
-      <Grid item xs={12} sm={6}>
-        <Typography variant="body1"><strong>Admitted Workloads:</strong> {clusterQueue.status?.admittedWorkloads}</Typography>
-        <Typography variant="body1"><strong>Reserving Workloads:</strong> {clusterQueue.status?.reservingWorkloads}</Typography>
-        <Typography variant="body1"><strong>Pending Workloads:</strong> {clusterQueue.status?.pendingWorkloads}</Typography>
-      </Grid>
-    </Grid>
+      <Typography variant="h4" gutterBottom>Cluster Queue Detail: {clusterQueueName}</Typography>
 
-    {/* Preemption Section */}
-    <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>
-      Preemption Settings
-    </Typography>
-    <Grid container spacing={2}>
-      <Grid item xs={12} sm={4}>
-        <Tooltip title="Determines whether a workload can preempt workloads in the cohort using more than their quota. Possible values: Never, LowerPriority, Any.">
-          <Typography variant="body1"><strong>Reclaim Within Cohort:</strong> {clusterQueue.spec?.preemption?.reclaimWithinCohort || 'Not configured'}</Typography>
-        </Tooltip>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={6}>
+          <Typography variant="body1"><strong>Name:</strong> {clusterQueue.metadata?.name}</Typography>
+          <Typography variant="body1"><strong>UID:</strong> {clusterQueue.metadata?.uid}</Typography>
+          <Typography variant="body1"><strong>Creation Timestamp:</strong> {new Date(clusterQueue.metadata?.creationTimestamp).toLocaleString()}</Typography>
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <Typography variant="body1"><strong>Admitted Workloads:</strong> {clusterQueue.status?.admittedWorkloads}</Typography>
+          <Typography variant="body1"><strong>Reserving Workloads:</strong> {clusterQueue.status?.reservingWorkloads}</Typography>
+          <Typography variant="body1"><strong>Pending Workloads:</strong> {clusterQueue.status?.pendingWorkloads}</Typography>
+        </Grid>
       </Grid>
-      <Grid item xs={12} sm={4}>
-        <Tooltip title="Policy for borrowing within cohort. Possible values: Never, LowerPriority. Only active if reclaimWithinCohort is set.">
-          <Typography variant="body1"><strong>Borrow Within Cohort:</strong> {clusterQueue.spec?.preemption?.borrowWithinCohort?.policy || 'Not configured'}</Typography>
-        </Tooltip>
-      </Grid>
-      <Grid item xs={12} sm={4}>
-        <Tooltip title="Determines if a workload can preempt others within the same ClusterQueue. Possible values: Never, LowerPriority, LowerOrNewerEqualPriority.">
-          <Typography variant="body1"><strong>Within ClusterQueue:</strong> {clusterQueue.spec?.preemption?.withinClusterQueue || 'Not configured'}</Typography>
-        </Tooltip>
-      </Grid>
-    </Grid>
 
-    {/* Resource Groups Section */}
-    <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>
-      Resource Groups
-    </Typography>
-    {/* Existing Resource Groups table code here */}
-    
-    {/* Flavor Fungibility Section */}
-    <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>
-      Flavor Fungibility
-    </Typography>
-    <Grid container spacing={2}>
-      <Grid item xs={12} sm={6}>
-        <Tooltip title="Determines whether to try the next flavor if a workload can borrow in the current one. Possible values: Borrow, TryNextFlavor.">
-          <Typography variant="body1"><strong>When Can Borrow:</strong> {clusterQueue.spec?.flavorFungibility?.whenCanBorrow || 'Default (Borrow)'}</Typography>
-        </Tooltip>
+      {/* Preemption Section */}
+      <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>
+        Preemption Settings
+      </Typography>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={4}>
+          <Tooltip title="Determines whether a workload can preempt workloads in the cohort using more than their quota. Possible values: Never, LowerPriority, Any.">
+            <Typography variant="body1"><strong>Reclaim Within Cohort:</strong> {clusterQueue.spec?.preemption?.reclaimWithinCohort || 'Not configured'}</Typography>
+          </Tooltip>
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <Tooltip title="Policy for borrowing within cohort. Possible values: Never, LowerPriority. Only active if reclaimWithinCohort is set.">
+            <Typography variant="body1"><strong>Borrow Within Cohort:</strong> {clusterQueue.spec?.preemption?.borrowWithinCohort?.policy || 'Not configured'}</Typography>
+          </Tooltip>
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <Tooltip title="Determines if a workload can preempt others within the same ClusterQueue. Possible values: Never, LowerPriority, LowerOrNewerEqualPriority.">
+            <Typography variant="body1"><strong>Within ClusterQueue:</strong> {clusterQueue.spec?.preemption?.withinClusterQueue || 'Not configured'}</Typography>
+          </Tooltip>
+        </Grid>
       </Grid>
-      <Grid item xs={12} sm={6}>
-        <Tooltip title="Determines whether to try the next flavor if preemption fails in the current one. Possible values: Preempt, TryNextFlavor.">
-          <Typography variant="body1"><strong>When Can Preempt:</strong> {clusterQueue.spec?.flavorFungibility?.whenCanPreempt || 'Default (TryNextFlavor)'}</Typography>
-        </Tooltip>
+
+      {/* Flavor Fungibility Section */}
+      <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>
+        Flavor Fungibility
+      </Typography>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={6}>
+          <Tooltip title="Determines whether to try the next flavor if a workload can borrow in the current one. Possible values: Borrow, TryNextFlavor.">
+            <Typography variant="body1"><strong>When Can Borrow:</strong> {clusterQueue.spec?.flavorFungibility?.whenCanBorrow || 'Default (Borrow)'}</Typography>
+          </Tooltip>
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <Tooltip title="Determines whether to try the next flavor if preemption fails in the current one. Possible values: Preempt, TryNextFlavor.">
+            <Typography variant="body1"><strong>When Can Preempt:</strong> {clusterQueue.spec?.flavorFungibility?.whenCanPreempt || 'Default (TryNextFlavor)'}</Typography>
+          </Tooltip>
+        </Grid>
       </Grid>
-    </Grid>
+
+
+
+      {/* Existing Resource Groups table code here */}
+      {/* Resource Groups Section */}
+      <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>
+        Resource Groups
+      </Typography>
+
+      {clusterQueue.resourceGroups && clusterQueue.resourceGroups.length === 0 ? (
+        <Typography>No resource groups defined for this cluster queue.</Typography>
+      ) : (
+        <TableContainer component={Paper} style={{ marginTop: '20px' }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Covered Resources</TableCell>
+                <TableCell>Flavor</TableCell>
+                <TableCell>Resource</TableCell>
+                <TableCell>Nominal Quota</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {clusterQueue.spec.resourceGroups.map((group, groupIndex) => (
+                <React.Fragment key={`resourceGroup-${groupIndex}`}>
+                  {group.flavors.map((flavor, flavorIndex) => (
+                    <React.Fragment key={`${groupIndex}-${flavor.name}`}>
+                      {flavor.resources.map((resource, resourceIndex) => (
+                        <TableRow key={`${groupIndex}-${flavor.name}-${resource.name}`}>
+                          {/* Display Covered Resources with rowSpan across all flavors and resources in this group */}
+                          {flavorIndex === 0 && resourceIndex === 0 && (
+                            <TableCell rowSpan={group.flavors.reduce((acc, f) => acc + f.resources.length, 0)}>
+                              {group.coveredResources.join(', ')}
+                            </TableCell>
+                          )}
+
+                          {/* Display Flavor Name with rowSpan across its resources */}
+                          {resourceIndex === 0 && (
+                            <TableCell rowSpan={flavor.resources.length}>
+                              <Link to={`/resource-flavor/${flavor.name}`}>{flavor.name}</Link>
+                            </TableCell>
+                          )}
+
+                          {/* Display Resource Name and Nominal Quota */}
+                          <TableCell>{resource.name}</TableCell>
+                          <TableCell>{resource.nominalQuota}</TableCell>
+                        </TableRow>
+                      ))}
+                    </React.Fragment>
+                  ))}
+                </React.Fragment>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
 
       {/* Local Queues Section */}
       <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>
