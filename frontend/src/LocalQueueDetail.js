@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Typography, Paper, Grid, CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import useWebSocket from './useWebSocket';
+import FlavorTable from './FlavorTable';
 
 const LocalQueueDetail = () => {
   const { queueName } = useParams();
@@ -69,53 +70,19 @@ const LocalQueueDetail = () => {
         </Table>
       </TableContainer>
 
-      <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>Flavor Usage</Typography>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Flavor Name</TableCell>
-              <TableCell>Resource</TableCell>
-              <TableCell>Total</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {queue.status?.flavorUsage?.map((flavor, index) => (
-              flavor.resources.map((resource, resIndex) => (
-                <TableRow key={`${index}-${resIndex}`}>
-                  <TableCell>{flavor.name}</TableCell>
-                  <TableCell>{resource.name}</TableCell>
-                  <TableCell>{resource.total}</TableCell>
-                </TableRow>
-              ))
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      {/* Reusable FlavorTable Component for Flavor Usage */}
+      <FlavorTable 
+        title="Flavor Usage" 
+        flavorData={queue.status?.flavorUsage} 
+        linkToFlavor={true} 
+      />
 
-      <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>Flavors Reservation</Typography>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Flavor Name</TableCell>
-              <TableCell>Resource</TableCell>
-              <TableCell>Total</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {queue.status?.flavorsReservation?.map((flavor, index) => (
-              flavor.resources.map((resource, resIndex) => (
-                <TableRow key={`${index}-${resIndex}`}>
-                  <TableCell>{flavor.name}</TableCell>
-                  <TableCell>{resource.name}</TableCell>
-                  <TableCell>{resource.total}</TableCell>
-                </TableRow>
-              ))
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      {/* Reusable FlavorTable Component for Flavors Reservation */}
+      <FlavorTable 
+        title="Flavors Reservation" 
+        flavorData={queue.status?.flavorsReservation} 
+        linkToFlavor={true} 
+      />
 
       <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>Admitted Workloads</Typography>
       <TableContainer component={Paper}>
