@@ -436,23 +436,26 @@ def get_cohort_details(cohort_name: str):
 
 
 
-def get_pods_for_workload(workload_name):
-    # Parse workload ID from workload name
-    workload_parts = workload_name.split("-")
-    workload_prefix = "-".join(workload_parts[1:3])  # Extract the unique workload ID
-    v1 = client.CoreV1Api()
-    
-    pods = []
+def get_pods_for_workload(job_uid: str):
+    """
+    Retrieves pods with the label `controller: {job_uid}`.
+    """
     try:
-        all_pods = v1.list_namespaced_pod(namespace=namespace)
-        for pod in all_pods.items:
-            if pod.metadata.name.startswith(workload_prefix):
-                pods.append({
-                    "name": pod.metadata.name,
-                    "status": pod.status.phase
-                })
-    except Exception as e:
-        print(f"Error fetching pods for workload {workload_name}: {e}")
-    return pods
+        pods = core_api.list_namespaced_pod(
+            namespace=namespace,
+            label_selector=f"controller-uid={job_uid}"
+        )
+        return [
+            {
+                "name": pod.metadata.name,
+                "status": pod.status.phase
+            }
+            for pod in pods.items
+        ]
+    except client.ApiException as e:
+        print(f"Error fetching pods for job_uid {job_uid}: {e}")
+        return []
+
+
 
 

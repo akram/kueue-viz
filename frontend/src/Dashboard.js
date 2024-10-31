@@ -15,16 +15,13 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Main WebSocket for kueue/status data
   const { data: kueueData, error: kueueError } = useWebSocket('ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/kueue');
 
-  // Process the workload data when received
   useEffect(() => {
     if (kueueData) {
       setQueues(kueueData.queues.items || []);
       setWorkloads(kueueData.workloads.items || []);
 
-      // Trigger a notification for preempted workloads
       kueueData.workloads.items.forEach(workload => {
         if (workload.preemption?.preempted) {
           toast.error(`Workload ${workload.metadata.name} was preempted: ${workload.preemption.reason}`);
@@ -35,18 +32,17 @@ const Dashboard = () => {
     setLoading(false);
   }, [kueueData, kueueError]);
 
-  const toggleRow = (workloadName) => {
+  const toggleRow = (job_uid) => {
     setExpandedRows((prevExpandedRows) => ({
       ...prevExpandedRows,
-      [workloadName]: !prevExpandedRows[workloadName],
+      [job_uid]: !prevExpandedRows[job_uid],
     }));
 
-    // Fetch pod data via WebSocket if not already fetched
-    if (!podsData[workloadName]) {
-      const { data: podData } = useWebSocket(`ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/workload/${workloadName}/pods`);
+    if (!podsData[job_uid]) {
+      const { data: podData } = useWebSocket(`ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/workload/${job_uid}/pods`);
       setPodsData((prevPodsData) => ({
         ...prevPodsData,
-        [workloadName]: podData,
+        [job_uid]: podData,
       }));
     }
   };
@@ -82,7 +78,6 @@ const Dashboard = () => {
         </Grid>
       </Grid>
 
-      {/* Display a table with workload details */}
       <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>
         Workloads
       </Typography>
@@ -92,26 +87,27 @@ const Dashboard = () => {
             <TableRow>
               <TableCell></TableCell>
               <TableCell>Name</TableCell>
+              <TableCell>Pods Count</TableCell>
               <TableCell>Queue Name</TableCell>
               <TableCell>Admission Status</TableCell>
               <TableCell>Cluster Queue Admission</TableCell>
               <TableCell>Preempted</TableCell>
               <TableCell>Priority</TableCell>
               <TableCell>Priority Class Name</TableCell>
-              <TableCell>Pods Count</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {workloads.map((workload) => {
               const podCount = workload.spec?.podSets?.reduce((sum, podSet) => sum + (podSet.count || 0), 0) || 0;
-              const isExpanded = expandedRows[workload.metadata.name];
-              const pods = podsData[workload.metadata.name] || [];
+              const job_uid = workload.metadata?.labels?.["kueue.x-k8s.io/job-uid"];
+              const isExpanded = expandedRows[job_uid];
+              const pods = podsData[job_uid] || [];
 
               return (
                 <React.Fragment key={workload.metadata.name}>
                   <TableRow>
                     <TableCell>
-                      <IconButton onClick={() => toggleRow(workload.metadata.name)}>
+                      <IconButton onClick={() => toggleRow(job_uid)}>
                         {isExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
                       </IconButton>
                     </TableCell>
@@ -120,8 +116,8 @@ const Dashboard = () => {
                         {workload.metadata.name}
                       </Link>
                     </TableCell>
-                    <TableCell><Link to={`/local-queue/${workload.spec.queueName}`}>{workload.spec.queueName}</Link></TableCell>
                     <TableCell>{podCount}</TableCell>
+                    <TableCell><Link to={`/local-queue/${workload.spec.queueName}`}>{workload.spec.queueName}</Link></TableCell>
                     {/* Add additional cells as needed */}
                   </TableRow>
                   <TableRow>
