@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, CircularProgress } from '@mui/material';
+import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, CircularProgress, Box } from '@mui/material';
 import useWebSocket from './useWebSocket';
 
 const ResourceFlavorDetail = () => {
@@ -12,7 +12,7 @@ const ResourceFlavorDetail = () => {
 
   useEffect(() => {
     if (flavorData && flavorData.name) {
-      console.log("Received flavor data:", flavorData); // Debug line
+      console.log("Received flavor data:", flavorData);
       setFlavor(flavorData);
     }
   }, [flavorData]);
@@ -28,46 +28,136 @@ const ResourceFlavorDetail = () => {
     );
   }
 
+  const { details, queues, nodes } = flavor;
+
   return (
     <Paper style={{ padding: '16px', marginTop: '20px' }}>
       <Typography variant="h4" gutterBottom>Resource Flavor Detail: {flavorName}</Typography>
-      <Typography variant="body1"><strong>Details:</strong> {JSON.stringify(flavor.details, null, 2)}</Typography>
 
-      <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>
-        Queues Using This Flavor
-      </Typography>
-      {flavor.queues && flavor.queues.length === 0 ? (
-        <Typography>No cluster queues are using this flavor.</Typography>
-      ) : (
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Cluster Queue Name</TableCell>
-                <TableCell>Resource</TableCell>
-                <TableCell>Nominal Quota</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {flavor.queues?.map((queue) => (
-                <React.Fragment key={queue.queueName}>
-                  <TableRow>
-                    <TableCell rowSpan={queue.quota.length}>{queue.queueName}</TableCell>
-                    <TableCell>{queue.quota[0].resource}</TableCell>
-                    <TableCell>{queue.quota[0].nominalQuota}</TableCell>
-                  </TableRow>
-                  {queue.quota.slice(1).map((resource, index) => (
-                    <TableRow key={`${queue.queueName}-${resource.resource}-${index}`}>
-                      <TableCell>{resource.resource}</TableCell>
-                      <TableCell>{resource.nominalQuota}</TableCell>
+      {/* Display Flavor Details */}
+      <Box mt={3}>
+        <Typography variant="h5" gutterBottom>Flavor Details</Typography>
+        <Typography variant="body1"><strong>Node Labels:</strong></Typography>
+        {details.nodeLabels ? (
+          <ul>
+            {Object.entries(details.nodeLabels).map(([key, value]) => (
+              <li key={key}>{key}: {value}</li>
+            ))}
+          </ul>
+        ) : (
+          <Typography variant="body2">No specific node labels.</Typography>
+        )}
+
+        <Typography variant="body1" mt={2}><strong>Node Taints:</strong></Typography>
+        {details.nodeTaints?.length ? (
+          <ul>
+            {details.nodeTaints.map((taint, index) => (
+              <li key={index}>
+                {taint.key}={taint.value} ({taint.effect})
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <Typography variant="body2">No specific node taints.</Typography>
+        )}
+
+        <Typography variant="body1" mt={2}><strong>Tolerations:</strong></Typography>
+        {details.tolerations?.length ? (
+          <ul>
+            {details.tolerations.map((toleration, index) => (
+              <li key={index}>
+                {toleration.key} ({toleration.operator}): {toleration.effect}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <Typography variant="body2">No specific tolerations.</Typography>
+        )}
+      </Box>
+
+      {/* Display Queues Using This Flavor */}
+      <Box mt={5}>
+        <Typography variant="h5" gutterBottom>Queues Using This Flavor</Typography>
+        {queues && queues.length === 0 ? (
+          <Typography>No cluster queues are using this flavor.</Typography>
+        ) : (
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Cluster Queue Name</TableCell>
+                  <TableCell>Resource</TableCell>
+                  <TableCell>Nominal Quota</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {queues.map((queue) => (
+                  <React.Fragment key={queue.queueName}>
+                    <TableRow>
+                      <TableCell rowSpan={queue.quota.length}>{queue.queueName}</TableCell>
+                      <TableCell>{queue.quota[0].resource}</TableCell>
+                      <TableCell>{queue.quota[0].nominalQuota}</TableCell>
                     </TableRow>
-                  ))}
-                </React.Fragment>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
+                    {queue.quota.slice(1).map((resource, index) => (
+                      <TableRow key={`${queue.queueName}-${resource.resource}-${index}`}>
+                        <TableCell>{resource.resource}</TableCell>
+                        <TableCell>{resource.nominalQuota}</TableCell>
+                      </TableRow>
+                    ))}
+                  </React.Fragment>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+      </Box>
+
+      {/* Display Nodes Matching This Flavor */}
+      <Box mt={5}>
+        <Typography variant="h5" gutterBottom>Nodes Matching This Flavor</Typography>
+        {nodes && nodes.length === 0 ? (
+          <Typography>No nodes match this flavor.</Typography>
+        ) : (
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Node Name</TableCell>
+                  <TableCell>Labels</TableCell>
+                  <TableCell>Taints</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {nodes.map((node) => (
+                  <TableRow key={node.name}>
+                    <TableCell>{node.name}</TableCell>
+                    <TableCell>
+                      <ul>
+                        {Object.entries(node.labels).map(([key, value]) => (
+                          <li key={key}>{key}: {value}</li>
+                        ))}
+                      </ul>
+                    </TableCell>
+                    <TableCell>
+                      {node.taints.length > 0 ? (
+                        <ul>
+                          {node.taints.map((taint, index) => (
+                            <li key={index}>
+                              {taint.key}={taint.value} ({taint.effect})
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <Typography variant="body2">No taints</Typography>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+      </Box>
     </Paper>
   );
 };

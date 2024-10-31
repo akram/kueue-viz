@@ -20,7 +20,8 @@ __all__ = [
     "get_cluster_queue_details",
     "get_cohorts",
     "get_cohort_details",
-    "get_pods_for_workload"
+    "get_pods_for_workload",
+    "get_nodes_for_flavor"
 ]
 
 # Determine the namespace dynamically from the mounted file
@@ -282,10 +283,13 @@ def get_resource_flavor_details(flavor_name: str):
                         })
                         break  # Stop searching once the flavor is found in this queue
 
+        matching_nodes = get_nodes_for_flavor(flavor_name)
+
         return {
             "name": flavor.get("metadata", {}).get("name", "Unknown Flavor"),
             "details": flavor.get("spec", {}),
-            "queues": queues_using_flavor
+            "queues": queues_using_flavor,
+            "nodes": matching_nodes
         }
 
     except client.ApiException as e:
@@ -482,6 +486,63 @@ def get_pods_for_workload(job_uid: str):
         print(f"Error fetching pods for job_uid {job_uid}: {e}")
         return []
 
+
+
+
+def get_nodes_for_flavor(flavor_name: str):
+    """
+    Retrieves nodes that match the given ResourceFlavor.
+    """
+    try:
+        # Fetch the specified ResourceFlavor
+        flavor = k8s_api.get_cluster_custom_object(
+            group="kueue.x-k8s.io",
+            version="v1beta1",
+            plural="resourceflavors",
+            name=flavor_name
+        )
+
+        # Extract the nodeLabels and nodeTaints criteria from the flavor spec
+        node_labels = flavor.get("spec", {}).get("nodeLabels", {})
+        node_taints = flavor.get("spec", {}).get("nodeTaints", [])
+
+        # List all nodes in the cluster
+        all_nodes = core_api.list_node()
+        
+        # Filter nodes based on labels and taints
+        matching_nodes = []
+        for node in all_nodes.items:
+            # Check if node has required labels
+            node_labels_match = all(
+                node.metadata.labels.get(key) == value
+                for key, value in node_labels.items()
+            )
+            
+            # Check if node has required taints
+            node_taints_match = True
+            if node_taints:
+                node_taints_match = all(
+                    any(
+                        node_taint.key == taint["key"] and
+                        node_taint.value == taint["value"] and
+                        node_taint.effect == taint["effect"]
+                        for node_taint in node.spec.taints or []
+                    )
+                    for taint in node_taints
+                )
+            
+            if node_labels_match and node_taints_match:
+                matching_nodes.append({
+                    "name": node.metadata.name,
+                    "labels": node.metadata.labels,
+                    "taints": [taint.to_dict() for taint in (node.spec.taints or [])]
+                })
+
+        return matching_nodes
+
+    except client.ApiException as e:
+        print(f"Error fetching nodes for ResourceFlavor {flavor_name}: {e}")
+        return []
 
 
 

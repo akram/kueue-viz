@@ -198,3 +198,4 @@ async def websocket_cohort_details(websocket: WebSocket, cohort_name: str):
 async def websocket_pods(websocket: WebSocket, job_uid: str):
     await websocket_handler(websocket, lambda: get_pods_for_workload(job_uid), f"/ws/workload/{job_uid}/pods")
 
+
