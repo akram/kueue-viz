@@ -10,18 +10,28 @@ h2 {
   margin-top: 20px;
 }
 
+th {
+  font-weight: bold;
+}
+
+tbody.tr.td {
+  padding: 8px;
+}
+
 .MuiPaper-root {
   text-align: center;
   color: #333;
-  padding: 16px;
+  padding: 8px;
 }
 
 
 .navbar-logo {
   width: 64px;
   height: 64px;
-  border-radius: 50%; /* Makes the image circular */
-  margin-right: 16px; /* Space between the icon and the title */
+  border-radius: 50%;
+  /* Makes the image circular */
+  margin-right: 16px;
+  /* Space between the icon and the title */
   background-color: white;
 }
 
@@ -31,4 +41,3 @@ h2 {
   display: flex;
   align-items: center;
 }
-

@@ -28,13 +28,16 @@ const ClusterQueues = () => {
                 <TableCell>Name</TableCell>
                 <TableCell>Cohort</TableCell>
                 <TableCell>Flavors</TableCell>
+                <TableCell>Admitted Workloads</TableCell>
+                <TableCell>Pending Workloads</TableCell>
+                <TableCell>Reserving Workloads</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {queues.map((queue) => (
                 <TableRow key={queue.name}>
                   <TableCell><Link to={`/cluster-queue/${queue.name}`}>{queue.name}</Link></TableCell>
-                  <TableCell><Link to={`/cohort/${queue.cohort}`}>{queue.cohort || '' }</Link></TableCell>
+                  <TableCell><Link to={`/cohort/${queue.cohort}`}>{queue.cohort || ''}</Link></TableCell>
                   <TableCell>
                     {queue.flavors.map((flavor, index) => (
                       <React.Fragment key={flavor}>
@@ -43,6 +46,9 @@ const ClusterQueues = () => {
                       </React.Fragment>
                     ))}
                   </TableCell>
+                  <TableCell>{queue.admittedWorkloads}</TableCell>
+                  <TableCell>{queue.pendingWorkloads}</TableCell>
+                  <TableCell>{queue.reservingWorkloads}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

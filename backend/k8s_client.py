@@ -72,6 +72,9 @@ def get_cluster_queues():
                 "name": queue["metadata"]["name"],
                 "cohort": queue["spec"]["cohort"],
                 "resourceGroups": queue["spec"]["resourceGroups"],
+                "admittedWorkloads": queue["status"]["admittedWorkloads"],
+                "pendingWorkloads": queue["status"]["pendingWorkloads"],
+                "reservingWorkloads": queue["status"]["reservingWorkloads"],
                 "flavors": [
                     flavor["name"]
                     for resource_group in queue.get("spec", {}).get("resourceGroups", [])

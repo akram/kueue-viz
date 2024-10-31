@@ -33,6 +33,11 @@ const ClusterQueueDetail = () => {
           <Typography variant="body1"><strong>Name:</strong> {clusterQueue.metadata?.name}</Typography>
           <Typography variant="body1"><strong>UID:</strong> {clusterQueue.metadata?.uid}</Typography>
           <Typography variant="body1"><strong>Creation Timestamp:</strong> {new Date(clusterQueue.metadata?.creationTimestamp).toLocaleString()}</Typography>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+          <Typography variant="body1"><strong>Admitted Workloads:</strong> {clusterQueue.status?.admittedWorkloads}</Typography>
+          <Typography variant="body1"><strong>Reserving Workloads:</strong> {clusterQueue.status?.reservingWorkloads}</Typography>
+          <Typography variant="body1"><strong>Pending Workloads:</strong> {clusterQueue.status?.pendingWorkloads}</Typography>
         </Grid>
       </Grid>
 
