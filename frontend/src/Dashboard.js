@@ -1,68 +1,55 @@
-import { Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, Typography } from '@mui/material';
+import { Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, Typography, IconButton, Collapse } from '@mui/material';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import useWebSocket from './useWebSocket';
 
 const Dashboard = () => {
   const [queues, setQueues] = useState([]);
   const [workloads, setWorkloads] = useState([]);
+  const [expandedRows, setExpandedRows] = useState({});
+  const [podsData, setPodsData] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const processWorkloadData = (data) => {
-    setQueues(data.queues.items || []);
-    setWorkloads(data.workloads.items || []);
+  // Main WebSocket for kueue/status data
+  const { data: kueueData, error: kueueError } = useWebSocket('ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/kueue');
 
-    // Check for preempted workloads and trigger a notification
-    data.workloads.items.forEach(workload => {
-      if (workload.preemption?.preempted) {
-        toast.error(`Workload ${workload.metadata.name} was preempted: ${workload.preemption.reason}`);
-      }
-    });
-  };
-
+  // Process the workload data when received
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get('http://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/kueue/status');
-        processWorkloadData(response.data);
-      } catch (error) {
-        setError('Failed to fetch data');
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (kueueData) {
+      setQueues(kueueData.queues.items || []);
+      setWorkloads(kueueData.workloads.items || []);
 
-    fetchData();
+      // Trigger a notification for preempted workloads
+      kueueData.workloads.items.forEach(workload => {
+        if (workload.preemption?.preempted) {
+          toast.error(`Workload ${workload.metadata.name} was preempted: ${workload.preemption.reason}`);
+        }
+      });
+    }
+    if (kueueError) setError("Failed to fetch data from WebSocket");
+    setLoading(false);
+  }, [kueueData, kueueError]);
 
-    const ws = new WebSocket(`ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/kueue`);
+  const toggleRow = (workloadName) => {
+    setExpandedRows((prevExpandedRows) => ({
+      ...prevExpandedRows,
+      [workloadName]: !prevExpandedRows[workloadName],
+    }));
 
-    ws.onopen = () => {
-      console.log("Connected to WebSocket");
-    };
-
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      processWorkloadData(data);
-    };
-
-    ws.onerror = (err) => {
-      console.error("WebSocket error:", err);
-      setError("WebSocket connection error");
-      ws.close();
-    };
-
-    ws.onclose = () => {
-      console.log("WebSocket connection closed");
-    };
-
-    return () => {
-      ws.close();
-    };
-  }, []);
+    // Fetch pod data via WebSocket if not already fetched
+    if (!podsData[workloadName]) {
+      const { data: podData } = useWebSocket(`ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/workload/${workloadName}/pods`);
+      setPodsData((prevPodsData) => ({
+        ...prevPodsData,
+        [workloadName]: podData,
+      }));
+    }
+  };
 
   if (loading) return <Typography variant="h6">Loading...</Typography>;
   if (error) return <Typography variant="h6" color="error">{error}</Typography>;
@@ -103,82 +90,63 @@ const Dashboard = () => {
         <Table>
           <TableHead>
             <TableRow>
+              <TableCell></TableCell>
               <TableCell>Name</TableCell>
-              <TableCell>Pods Count</TableCell>
               <TableCell>Queue Name</TableCell>
               <TableCell>Admission Status</TableCell>
               <TableCell>Cluster Queue Admission</TableCell>
               <TableCell>Preempted</TableCell>
               <TableCell>Priority</TableCell>
               <TableCell>Priority Class Name</TableCell>
+              <TableCell>Pods Count</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {workloads.map(workload => {
+            {workloads.map((workload) => {
               const podCount = workload.spec?.podSets?.reduce((sum, podSet) => sum + (podSet.count || 0), 0) || 0;
+              const isExpanded = expandedRows[workload.metadata.name];
+              const pods = podsData[workload.metadata.name] || [];
 
               return (
-                <TableRow key={workload.metadata.name}>
-                  <TableCell>
-                    <Tooltip
-                      title={
-                        <div>
-                          <div><strong>Pod Sets Count:</strong> {workload.spec?.podSets?.[0]?.count || 'N/A'}</div>
-                          <div><strong>Owner Reference: {workload.ownerReferences?.[0]?.uid || 'N/A'}</strong></div>
-                          <div>API Version: {workload.ownerReferences?.[0]?.apiVersion || 'N/A'}</div>
-                          <div>Kind: {workload.ownerReferences?.[0]?.kind || 'N/A'}</div>
-                          <div>Name: {workload.ownerReferences?.[0]?.name || 'N/A'}</div>
-                        </div>
-                      }
-                      arrow
-                    >
+                <React.Fragment key={workload.metadata.name}>
+                  <TableRow>
+                    <TableCell>
+                      <IconButton onClick={() => toggleRow(workload.metadata.name)}>
+                        {isExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                      </IconButton>
+                    </TableCell>
+                    <TableCell>
                       <Link to={`/workload/${workload.metadata.name}`}>
-                        <span style={{ cursor: 'pointer', textDecoration: 'underline', color: 'blue' }}>
-                          {workload.metadata.name}
-                        </span>
+                        {workload.metadata.name}
                       </Link>
-                    </Tooltip>
-                  </TableCell>
-                  <TableCell>{podCount}</TableCell>
-                  <TableCell><Link to={`/local-queue/${workload.spec.queueName}`}>{workload.spec.queueName}</Link></TableCell>
-                  <TableCell>
-                    {(() => {
-                      const admittedCondition = workload.status?.conditions?.find(cond => cond.type === "Admitted");
-                      if (admittedCondition) {
-                        const admissionStatus = admittedCondition.status === "True" ? "Admitted" : "Not admitted";
-                        return `${admissionStatus}: ${admittedCondition.reason}`;
-                      }
-                      return "Pending";
-                    })()}
-                  </TableCell>
-                  <TableCell>
-                    <Link to={`/cluster-queue/${workload.status?.admission?.clusterQueue}`}>{workload.status?.admission?.clusterQueue}</Link>
-                  </TableCell>
-                  <TableCell>
-                    <Tooltip
-                      title={
-                        <div>
-                          <div><strong>Message:</strong> {workload.status?.conditions?.find(cond => cond.type === "Evicted")?.message || 'N/A'}</div>
-                        </div>
-                      }
-                      arrow
-                    >
-                      <Link to={`/workload/${workload.metadata.name}`}>
-                        <span style={{ cursor: 'pointer', textDecoration: 'underline', color: 'blue' }}>
-                        {(() => {
-                          const evictedCondition = workload.status?.conditions?.find(cond => cond.type === "Evicted" && cond.status === "True");
-                          if (evictedCondition) {
-                            return `Yes: ${evictedCondition.reason}`;
-                          }
-                          return "No";
-                        })()}
-                        </span>
-                      </Link>
-                    </Tooltip>
-                  </TableCell>
-                  <TableCell>{workload.spec.priority}</TableCell>
-                  <TableCell>{workload.spec.priorityClassName}</TableCell>
-                </TableRow>
+                    </TableCell>
+                    <TableCell><Link to={`/local-queue/${workload.spec.queueName}`}>{workload.spec.queueName}</Link></TableCell>
+                    <TableCell>{podCount}</TableCell>
+                    {/* Add additional cells as needed */}
+                  </TableRow>
+                  <TableRow>
+                    <TableCell colSpan={9} style={{ paddingBottom: 0, paddingTop: 0 }}>
+                      <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                        <Table size="small">
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Pod Name</TableCell>
+                              <TableCell>Status</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {pods.map((pod) => (
+                              <TableRow key={pod.name}>
+                                <TableCell>{pod.name}</TableCell>
+                                <TableCell>{pod.status}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </Collapse>
+                    </TableCell>
+                  </TableRow>
+                </React.Fragment>
               );
             })}
           </TableBody>

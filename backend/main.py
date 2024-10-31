@@ -193,3 +193,6 @@ async def websocket_cohorts(websocket: WebSocket):
 async def websocket_cohort_details(websocket: WebSocket, cohort_name: str):
     await websocket_handler(websocket, lambda: get_cohort_details(cohort_name),f"/ws/cohort/{cohort_name}")
 
+@app.websocket("/ws/workload/{workload_name}/pods")
+async def websocket_pods(websocket: WebSocket, workload_name: str):
+    await websocket_handler(websocket, lambda: get_pods_for_workload(workload_name),f"/ws/workload/{workload_name}/pods")

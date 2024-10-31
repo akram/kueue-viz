@@ -19,7 +19,8 @@ __all__ = [
     "get_local_queue_details",
     "get_cluster_queue_details",
     "get_cohorts",
-    "get_cohort_details"
+    "get_cohort_details",
+    "get_pods_for_workload"
 ]
 
 # Determine the namespace dynamically from the mounted file
@@ -432,3 +433,26 @@ def get_cohort_details(cohort_name: str):
     except client.ApiException as e:
         print(f"Error fetching details for cohort {cohort_name}: {e}")
         return None
+
+
+
+def get_pods_for_workload(workload_name):
+    # Parse workload ID from workload name
+    workload_parts = workload_name.split("-")
+    workload_prefix = "-".join(workload_parts[1:3])  # Extract the unique workload ID
+    v1 = client.CoreV1Api()
+    
+    pods = []
+    try:
+        all_pods = v1.list_namespaced_pod(namespace=namespace)
+        for pod in all_pods.items:
+            if pod.metadata.name.startswith(workload_prefix):
+                pods.append({
+                    "name": pod.metadata.name,
+                    "status": pod.status.phase
+                })
+    except Exception as e:
+        print(f"Error fetching pods for workload {workload_name}: {e}")
+    return pods
+
+
