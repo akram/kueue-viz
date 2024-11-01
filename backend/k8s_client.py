@@ -126,7 +126,8 @@ def get_workloads():
             if job_uid:
                 pod_entry = {
                     "name": pod.metadata.name,
-                    "status": pod.status.phase
+                    "status": pod.status,
+                    "phase": pod.status.phase
                 }
                 if job_uid in pod_map:
                     pod_map[job_uid].append(pod_entry)
