@@ -135,15 +135,31 @@ const Dashboard = () => {
                             <TableRow>
                               <TableCell>Pod Name</TableCell>
                               <TableCell>Status</TableCell>
+                              <TableCell>Pending Reason</TableCell>
                             </TableRow>
                           </TableHead>
                           <TableBody>
-                            {pods.map((pod) => (
-                              <TableRow key={pod.name}>
-                                <TableCell>{pod.name}</TableCell>
-                                <TableCell>{pod.status}</TableCell>
-                              </TableRow>
-                            ))}
+                            {pods.map((pod) => {
+                              const podPhase = pod.status?.phase;
+                              const pendingCondition = pod.status?.conditions?.find(
+                                cond => cond.type === "PodScheduled" && cond.status === "False"
+                              );
+                              return (
+                                <TableRow key={pod.name}>
+                                  <TableCell>{pod.name}</TableCell>
+                                  <TableCell>{podPhase}</TableCell>
+                                  <TableCell>
+                                    {podPhase === "Pending" && pendingCondition ? (
+                                      <Tooltip title={`${pendingCondition.reason}: ${pendingCondition.message}`}>
+                                        <Typography color="error">{pendingCondition.reason}</Typography>
+                                      </Tooltip>
+                                    ) : (
+                                      "N/A"
+                                    )}
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
                           </TableBody>
                         </Table>
                       </Collapse>
