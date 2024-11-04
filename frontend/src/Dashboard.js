@@ -21,7 +21,7 @@ const Dashboard = () => {
     if (kueueData) {
       setQueues(kueueData.queues.items || []);
       setWorkloads(kueueData.workloads.items || []);
-      setWorkloadsByUid(kueueData.workloads.workloads_by_uid || {}); // Set workloads_by_uid
+      setWorkloadsByUid(kueueData.workloads.workloads_by_uid || {});
 
       kueueData.workloads.items.forEach(workload => {
         if (workload.preemption?.preempted) {
@@ -38,6 +38,29 @@ const Dashboard = () => {
       ...prevExpandedRows,
       [workloadName]: !prevExpandedRows[workloadName],
     }));
+  };
+
+  const formatPreemptedText = (preemptedCondition) => {
+    if (!preemptedCondition) return "";
+
+    const preemptedText = `${preemptedCondition.type}: ${preemptedCondition.message || ""}`;
+    
+    // Match UID pattern in the message
+    const uidPattern = /\(UID: (\w+)\)/;
+    const parts = preemptedText.split(uidPattern);
+
+    return parts.map((part, index) => {
+      // If part matches a UID in `workloadsByUid`, render it as a Link
+      if (workloadsByUid[part]) {
+        return (
+          <Link key={index} to={`/workload/${workloadsByUid[part]}`}>
+            (UID: {part})
+          </Link>
+        );
+      }
+      // Otherwise, render as plain text
+      return <span key={index}>{part}</span>;
+    });
   };
 
   if (loading) return <Typography variant="h6">Loading...</Typography>;
@@ -96,8 +119,7 @@ const Dashboard = () => {
               const pods = workload.pods || [];
 
               const preemptedCondition = workload.status?.conditions?.find(cond => cond.reason === "Preempted" && cond.status === "True");
-              //const preemptedText = preemptedCondition ? `${preemptedCondition.type}: ${preemptedCondition.message}` : "";
-              const preemptedText = preemptedCondition ? `${preemptedCondition.type}: ${preemptedCondition.message.replace(/\(UID: (\w+)\)/, (match, uid) => workloadsByUid[uid] ? `(UID: <Link to="/workload/${workloadsByUid[uid]}">${uid}</Link>)` : match)}` : "";
+              const preemptedText = formatPreemptedText(preemptedCondition);
 
               return (
                 <React.Fragment key={workload.metadata.name}>
