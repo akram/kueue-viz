@@ -133,6 +133,7 @@ const Dashboard = () => {
                         <Table size="small">
                           <TableHead>
                             <TableRow>
+                              <TableCell style={{ width: '50px' }}>|</TableCell> {/* Tree indicator column */}
                               <TableCell>Pod Name</TableCell>
                               <TableCell>Status</TableCell>
                               <TableCell>Pending Reason</TableCell>
@@ -147,11 +148,9 @@ const Dashboard = () => {
                               return (
                                 <TableRow key={pod.name}>
                                   <TableCell>
-                                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                                      <span style={{ marginRight: 8, color: '#888' }}>⎯</span> {/* Tree indicator */}
-                                      {pod.name}
-                                    </div>
+                                    <span style={{ color: '#888' }}>⎯</span> {/* Tree indicator */}
                                   </TableCell>
+                                  <TableCell>{pod.name}</TableCell>
                                   <TableCell>{podPhase}</TableCell>
                                   <TableCell>
                                     {podPhase === "Pending" && pendingCondition ? (
