@@ -64,12 +64,7 @@ const Dashboard = () => {
         }
         arrow
       >
-        <Typography
-          style={{ cursor: 'pointer', textDecoration: 'underline', color: 'blue' }}
-          component="span"
-        >
-          Preemption Details
-        </Typography>
+        <Typography component="span">{preemptedCondition.type}</Typography>
       </Tooltip>
     );
   };
