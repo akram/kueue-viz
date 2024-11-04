@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper } from '@mui/material';
+import './App.css';
 
 const FlavorTable = ({ title, flavorData, linkToFlavor }) => (
   <>

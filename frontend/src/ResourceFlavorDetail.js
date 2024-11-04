@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, CircularProgress, Box } from '@mui/material';
 import useWebSocket from './useWebSocket';
+import './App.css';
 
 const ResourceFlavorDetail = () => {
   const { flavorName } = useParams();

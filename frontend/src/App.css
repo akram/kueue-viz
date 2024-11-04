@@ -10,6 +10,12 @@ h2 {
   margin-top: 20px;
 }
 
+
+/* Apply bold font style to all table headers */
+th.MuiTableCell-head {
+  font-weight: bold;
+}
+
 th {
   font-weight: bold;
 }

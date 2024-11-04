@@ -2,6 +2,7 @@ import { CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, T
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import useWebSocket from './useWebSocket';
+import './App.css';
 
 
 const LocalQueues = () => {

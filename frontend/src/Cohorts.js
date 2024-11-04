@@ -4,6 +4,7 @@ import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHe
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import useWebSocket from './useWebSocket';
+import './App.css';
 
 const Cohorts = () => {
   const { data: cohorts, error } = useWebSocket('ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/cohorts');

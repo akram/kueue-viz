@@ -1,5 +1,6 @@
 import { Link, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip } from '@mui/material';
 import React from 'react';
+import './App.css';
 
 const WorkloadsList = ({ workloads }) => {
   return (

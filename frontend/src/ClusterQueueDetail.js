@@ -2,6 +2,7 @@ import { CircularProgress, Grid, Link, Paper, Table, TableBody, TableCell, Table
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import useWebSocket from './useWebSocket';
+import './App.css';
 
 const ClusterQueueDetail = () => {
   const { clusterQueueName } = useParams();

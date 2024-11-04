@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Typography, Paper, CircularProgress, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import useWebSocket from './useWebSocket';
+import './App.css';
 
 const WorkloadDetail = () => {
   const { workloadName } = useParams();

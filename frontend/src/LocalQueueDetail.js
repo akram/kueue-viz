@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Typography, Paper, Grid, CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import useWebSocket from './useWebSocket';
 import FlavorTable from './FlavorTable';
+import './App.css';
 
 const LocalQueueDetail = () => {
   const { queueName } = useParams();
