@@ -57,8 +57,8 @@ def get_local_queues():
         return [
             {
                 "name": item["metadata"]["name"],
+                "spec": item["spec"],
                 "status": item["status"],
-                    # Add more fields as required
             }
             for item in local_queues.get("items", [])
         ]

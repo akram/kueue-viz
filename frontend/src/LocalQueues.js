@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import useWebSocket from './useWebSocket';
 import './App.css';
 
-
 const LocalQueues = () => {
   const { data: localQueues, error } = useWebSocket('ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/local-queues');
   const [queues, setQueues] = useState([]);
@@ -28,6 +27,7 @@ const LocalQueues = () => {
             <TableHead>
               <TableRow>
                 <TableCell>Name</TableCell>
+                <TableCell>Cluster Queue</TableCell>
                 <TableCell>Admitted Workloads</TableCell>
                 <TableCell>Pending Workloads</TableCell>
                 <TableCell>Reserving Workloads</TableCell>
@@ -36,9 +36,14 @@ const LocalQueues = () => {
             <TableBody>
               {queues.map((queue) => (
                 <TableRow key={queue.name}>
-                  <TableCell><Link to={`/local-queue/${queue.name}`}>{queue.name}</Link></TableCell>
+                  <TableCell>
+                    <Link to={`/local-queue/${queue.name}`}>{queue.name}</Link>
+                  </TableCell>
+                  <TableCell>
+                    <Link to={`/cluster-queue/${queue.spec?.clusterQueue}`}>{queue.spec?.clusterQueue}</Link>
+                  </TableCell>
                   <TableCell>{queue.status?.admittedWorkloads}</TableCell>
-                  <TableCell>{queue.status?.reservingWorkloads}</TableCell>
+                  <TableCell>{queue.status?.pendingWorkloads}</TableCell>
                   <TableCell>{queue.status?.reservingWorkloads}</TableCell>
                 </TableRow>
               ))}
