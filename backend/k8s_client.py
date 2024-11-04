@@ -160,7 +160,7 @@ def get_workloads():
             # Add to workloads_by_uid map
             workload_name = workload['metadata']['name']
             workload_uid = workload['metadata']['uid']
-            workloads_by_uid[workload_name] = workload_uid
+            workloads_by_uid[workload_uid] = workload_name
 
         # Return workloads and workloads_by_uid as part of the response
         return {
