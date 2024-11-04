@@ -95,6 +95,7 @@ const ClusterQueueDetail = () => {
               <TableCell>Resource</TableCell>
               <TableCell>Total</TableCell>
               <TableCell>Borrowed</TableCell>
+              <TableCell>-</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -105,6 +106,7 @@ const ClusterQueueDetail = () => {
                   <TableCell>{resource.name}</TableCell>
                   <TableCell>{resource.total}</TableCell>
                   <TableCell>{resource.borrowed}</TableCell>
+                  <TableCell>-</TableCell>
                 </TableRow>
               ))
             )}
@@ -124,6 +126,7 @@ const ClusterQueueDetail = () => {
               <TableCell>Resource</TableCell>
               <TableCell>Total</TableCell>
               <TableCell>Borrowed</TableCell>
+              <TableCell>-</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -134,6 +137,7 @@ const ClusterQueueDetail = () => {
                   <TableCell>{resource.name}</TableCell>
                   <TableCell>{resource.total}</TableCell>
                   <TableCell>{resource.borrowed}</TableCell>
+                  <TableCell>-</TableCell>
                 </TableRow>
               ))
             )}
@@ -144,7 +148,7 @@ const ClusterQueueDetail = () => {
       {/* Existing Resource Groups table code here */}
       {/* Resource Groups Section */}
       <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>
-        Resource Groups
+        Resource Groups (Quotas)
       </Typography>
 
       {clusterQueue.resourceGroups && clusterQueue.resourceGroups.length === 0 ? (
@@ -154,10 +158,11 @@ const ClusterQueueDetail = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Covered Resources</TableCell>
                 <TableCell>Flavor</TableCell>
                 <TableCell>Resource</TableCell>
                 <TableCell>Nominal Quota</TableCell>
+                <TableCell>Borrowing Limit</TableCell>
+                <TableCell>Lending Limit</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -167,13 +172,6 @@ const ClusterQueueDetail = () => {
                     <React.Fragment key={`${groupIndex}-${flavor.name}`}>
                       {flavor.resources.map((resource, resourceIndex) => (
                         <TableRow key={`${groupIndex}-${flavor.name}-${resource.name}`}>
-                          {/* Display Covered Resources with rowSpan across all flavors and resources in this group */}
-                          {flavorIndex === 0 && resourceIndex === 0 && (
-                            <TableCell rowSpan={group.flavors.reduce((acc, f) => acc + f.resources.length, 0)}>
-                              {group.coveredResources.join(', ')}
-                            </TableCell>
-                          )}
-
                           {/* Display Flavor Name with rowSpan across its resources */}
                           {resourceIndex === 0 && (
                             <TableCell rowSpan={flavor.resources.length}>
@@ -184,6 +182,8 @@ const ClusterQueueDetail = () => {
                           {/* Display Resource Name and Nominal Quota */}
                           <TableCell>{resource.name}</TableCell>
                           <TableCell>{resource.nominalQuota}</TableCell>
+                          <TableCell>{resource.borrowingLimit}</TableCell>
+                          <TableCell>{resource.lendingLimit}</TableCell>
                         </TableRow>
                       ))}
                     </React.Fragment>
