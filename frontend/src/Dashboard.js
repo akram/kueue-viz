@@ -40,27 +40,38 @@ const Dashboard = () => {
     }));
   };
 
-  const formatPreemptedText = (preemptedCondition) => {
+  const formatPreemptedTextWithTooltip = (preemptedCondition) => {
     if (!preemptedCondition) return "";
 
     const preemptedText = `${preemptedCondition.type}: ${preemptedCondition.message || ""}`;
-    
-    // Match UID pattern in the message
-    const uidPattern = /\(UID: (\w+)\)/;
-    const parts = preemptedText.split(uidPattern);
 
-    return parts.map((part, index) => {
-      // If part matches a UID in `workloadsByUid`, render it as a Link
-      if (workloadsByUid[part]) {
-        return (
-          <Link key={index} to={`/workload/${workloadsByUid[part]}`}>
-            (UID: {part})
-          </Link>
-        );
-      }
-      // Otherwise, render as plain text
-      return <span key={index}>{part}</span>;
-    });
+  // Match UID pattern in the message
+  const uidPattern = /\(UID: ([0-9a-fA-F-]+)\)/;
+  const parts = preemptedText.split(uidPattern);
+
+    return (
+      <Tooltip
+        title={
+          parts.map((part, index) => (
+            workloadsByUid[part] ? (
+              <Link key={index} to={`/workload/${workloadsByUid[part]}`}>
+                (UID: {part})
+              </Link>
+            ) : (
+              <span key={index}>{part}</span>
+            )
+          ))
+        }
+        arrow
+      >
+        <Typography
+          style={{ cursor: 'pointer', textDecoration: 'underline', color: 'blue' }}
+          component="span"
+        >
+          Preemption Details
+        </Typography>
+      </Tooltip>
+    );
   };
 
   if (loading) return <Typography variant="h6">Loading...</Typography>;
@@ -119,7 +130,6 @@ const Dashboard = () => {
               const pods = workload.pods || [];
 
               const preemptedCondition = workload.status?.conditions?.find(cond => cond.reason === "Preempted" && cond.status === "True");
-              const preemptedText = formatPreemptedText(preemptedCondition);
 
               return (
                 <React.Fragment key={workload.metadata.name}>
@@ -150,7 +160,9 @@ const Dashboard = () => {
                         {workload.status?.admission?.clusterQueue || "N/A"}
                       </Link>
                     </TableCell>
-                    <TableCell className="preempted-column">{preemptedText}</TableCell>
+                    <TableCell className="preempted-column">
+                      {formatPreemptedTextWithTooltip(preemptedCondition)}
+                    </TableCell>
                     <TableCell className="priority-column">{workload.spec.priority || "N/A"}</TableCell>
                     <TableCell className="priority-class-column">{workload.spec.priorityClassName || "N/A"}</TableCell>
                   </TableRow>
