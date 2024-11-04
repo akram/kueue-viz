@@ -47,3 +47,21 @@ tbody.tr.td {
   display: flex;
   align-items: center;
 }
+
+.icon-column {
+  width: 5%;
+}
+
+.name-column {
+  flex: 2;
+}
+
+.pods-count-column,
+.queue-name-column,
+.admission-status-column,
+.cluster-queue-column,
+.preempted-column,
+.priority-column,
+.priority-class-column {
+  flex: 1;
+}

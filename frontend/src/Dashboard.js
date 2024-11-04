@@ -76,15 +76,15 @@ const Dashboard = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell style={{ width: '50px' }}></TableCell> {/* Fixed width for icon column */}
-              <TableCell>Name</TableCell>
-              <TableCell>Pods Count</TableCell>
-              <TableCell>Queue Name</TableCell>
-              <TableCell>Admission Status</TableCell>
-              <TableCell>Cluster Queue Admission</TableCell>
-              <TableCell>Preempted</TableCell>
-              <TableCell>Priority</TableCell>
-              <TableCell>Priority Class Name</TableCell>
+              <TableCell className="icon-column"></TableCell>
+              <TableCell className="name-column">Name</TableCell>
+              <TableCell className="pods-count-column">Pods Count</TableCell>
+              <TableCell className="queue-name-column">Queue Name</TableCell>
+              <TableCell className="admission-status-column">Admission Status</TableCell>
+              <TableCell className="cluster-queue-column">Cluster Queue Admission</TableCell>
+              <TableCell className="preempted-column">Preempted</TableCell>
+              <TableCell className="priority-column">Priority</TableCell>
+              <TableCell className="priority-class-column">Priority Class Name</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -93,40 +93,41 @@ const Dashboard = () => {
               const isExpanded = expandedRows[workload.metadata.name];
               const pods = workload.pods || [];
 
-              // Determine preemption status
               const preemptedCondition = workload.status?.conditions?.find(cond => cond.type === "Evicted" && cond.status === "True");
               const preemptedText = preemptedCondition ? `Yes: ${preemptedCondition.reason}` : "No";
 
               return (
                 <React.Fragment key={workload.metadata.name}>
                   <TableRow>
-                    <TableCell>
+                    <TableCell className="icon-column">
                       <IconButton onClick={() => toggleRow(workload.metadata.name)}>
                         {isExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
                       </IconButton>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="name-column">
                       <Link to={`/workload/${workload.metadata.name}`}>
                         {workload.metadata.name}
                       </Link>
                     </TableCell>
-                    <TableCell>{podCount}</TableCell>
-                    <TableCell><Link to={`/local-queue/${workload.spec.queueName}`}>{workload.spec.queueName}</Link></TableCell>
-                    <TableCell>
+                    <TableCell className="pods-count-column">{podCount}</TableCell>
+                    <TableCell className="queue-name-column">
+                      <Link to={`/local-queue/${workload.spec.queueName}`}>{workload.spec.queueName}</Link>
+                    </TableCell>
+                    <TableCell className="admission-status-column">
                       {(() => {
                         const admittedCondition = workload.status?.conditions?.find(cond => cond.type === "Admitted");
                         const admissionStatus = admittedCondition && admittedCondition.status === "True" ? "Admitted" : "Not admitted";
                         return `${admissionStatus}: ${admittedCondition?.reason || "N/A"}`;
                       })()}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="cluster-queue-column">
                       <Link to={`/cluster-queue/${workload.status?.admission?.clusterQueue}`}>
                         {workload.status?.admission?.clusterQueue || "N/A"}
                       </Link>
                     </TableCell>
-                    <TableCell>{preemptedText}</TableCell>
-                    <TableCell>{workload.spec.priority || "N/A"}</TableCell>
-                    <TableCell>{workload.spec.priorityClassName || "N/A"}</TableCell>
+                    <TableCell className="preempted-column">{preemptedText}</TableCell>
+                    <TableCell className="priority-column">{workload.spec.priority || "N/A"}</TableCell>
+                    <TableCell className="priority-class-column">{workload.spec.priorityClassName || "N/A"}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell colSpan={9} style={{ paddingBottom: 0, paddingTop: 0 }}>
@@ -134,9 +135,9 @@ const Dashboard = () => {
                         <Table size="small">
                           <TableHead>
                             <TableRow>
-                              <TableCell style={{ width: '50px' }}>|</TableCell> {/* Tree indicator column */}
-                              <TableCell>Pod Name</TableCell>
-                              <TableCell>Status</TableCell>
+                              <TableCell className="icon-column">|</TableCell>
+                              <TableCell className="name-column">Pod Name</TableCell>
+                              <TableCell className="pods-count-column">Status</TableCell>
                               <TableCell>Pending Reason</TableCell>
                             </TableRow>
                           </TableHead>
@@ -148,11 +149,11 @@ const Dashboard = () => {
                               );
                               return (
                                 <TableRow key={pod.name}>
-                                  <TableCell>
-                                    <span style={{ color: '#888' }}>⎯</span> {/* Tree indicator */}
+                                  <TableCell className="icon-column">
+                                    <span style={{ color: '#888' }}>⎯</span>
                                   </TableCell>
-                                  <TableCell>{pod.name}</TableCell>
-                                  <TableCell>{podPhase}</TableCell>
+                                  <TableCell className="name-column">{pod.name}</TableCell>
+                                  <TableCell className="pods-count-column">{podPhase}</TableCell>
                                   <TableCell>
                                     {podPhase === "Pending" && pendingCondition ? (
                                       <Tooltip title={`${pendingCondition.reason}: ${pendingCondition.message}`}>
