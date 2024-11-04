@@ -93,8 +93,8 @@ const Dashboard = () => {
               const isExpanded = expandedRows[workload.metadata.name];
               const pods = workload.pods || [];
 
-              const preemptedCondition = workload.status?.conditions?.find(cond => cond.type === "Evicted" && cond.status === "True");
-              const preemptedText = preemptedCondition ? `Yes: ${preemptedCondition.reason}` : "No";
+              const preemptedCondition = workload.status?.conditions?.find(cond => cond.reason === "Preempted" && cond.status === "True");
+              const preemptedText = preemptedCondition ? `Yes: ${preemptedCondition.message}` : "No";
 
               return (
                 <React.Fragment key={workload.metadata.name}>
