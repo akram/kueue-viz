@@ -1,5 +1,11 @@
 import os
 from kubernetes import client, config
+import json
+import time
+import datetime
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 # Load Kubernetes configuration for in-cluster access
 config.load_incluster_config()
@@ -21,7 +27,8 @@ __all__ = [
     "get_cohorts",
     "get_cohort_details",
     "get_pods_for_workload",
-    "get_nodes_for_flavor"
+    "get_nodes_for_flavor",
+    "remove_managed_fields"
 ]
 
 # Determine the namespace dynamically from the mounted file
@@ -98,7 +105,7 @@ def get_queues():
             namespace=namespace,
             plural="localqueues"
         )
-        return queues
+        return remove_managed_fields(queues)
     except client.ApiException as e:
         print(f"Error fetching queues: {e.status} {e.reason} - {e.body}")
         return {"error": e.body}
@@ -115,9 +122,9 @@ def get_workloads():
             namespace=namespace,
             plural="workloads"
         )
-
+        workloads = remove_managed_fields(workloads)
         # Retrieve all pods in the namespace
-        pods = core_api.list_namespaced_pod(namespace=namespace)
+        pods = remove_managed_fields(core_api.list_namespaced_pod(namespace=namespace))
 
         # Map pods by their `controller-uid` label for fast lookup
         pod_map = {}
@@ -126,8 +133,9 @@ def get_workloads():
             if job_uid:
                 pod_entry = {
                     "name": pod.metadata.name,
-                    "status": pod.status,
-                    "phase": pod.status.phase
+                    # "phase": pod.status.phase,
+                    # "conditions": pod.status.conditions  # Add the status.phase here
+                    "status": recursive_to_dict(pod.status) if pod.status else {}  # Recursively convert status to dict
                 }
                 if job_uid in pod_map:
                     pod_map[job_uid].append(pod_entry)
@@ -147,12 +155,28 @@ def get_workloads():
                 'preempted': preempted,
                 'reason': preemption_reason
             }
-
+            start_time = time.time()
+            print(f"DEBUG: about to return workloads:\n {json.dumps(workloads)}")
+            print(f"DEBUG: Print time: {time.time() - start_time} seconds")
         return workloads
     except client.ApiException as e:
         print(f"Error fetching workloads: {e.status} {e.reason} - {e.body}")
         return {"error": e.body}
 
+
+def slim_down_pod_status(pod_status):
+    return {
+        "phase": pod_status.get("phase"),
+        "conditions": pod_status.get("conditions"),
+        "containerStatuses": [
+            {
+                "name": c["name"],
+                "state": c["state"],
+                "ready": c["ready"]
+            }
+            for c in pod_status.get("containerStatuses", [])
+        ]
+    }
 
 def get_workload_by_name(workload_name: str):
     try:
@@ -546,4 +570,34 @@ def get_nodes_for_flavor(flavor_name: str):
         return []
 
 
+def remove_managed_fields(obj):
+    """
+    Recursively removes 'managedFields' from dictionaries and lists.
+    """
+    if isinstance(obj, dict):
+        obj.pop("managedFields", None)  # Remove 'managedFields' if present
+        for key, value in obj.items():
+            obj[key] = remove_managed_fields(value)  # Recursively apply to nested items
+    elif isinstance(obj, list):
+        obj = [remove_managed_fields(item) for item in obj]  # Recursively apply to each item in list
+    return obj
 
+
+def recursive_to_dict(obj):
+    """
+    Recursively converts Kubernetes API objects to dictionaries.
+    Also handles datetime serialization to ISO format.
+    """
+    if isinstance(obj, datetime.datetime):
+        return obj.isoformat()
+    elif hasattr(obj, "to_dict"):
+        obj_dict = obj.to_dict()
+        # Add debug log to see the structure
+        logging.debug(f"Converting object with to_dict: {type(obj)}")
+        return recursive_to_dict(obj_dict)
+    elif isinstance(obj, list):
+        return [recursive_to_dict(i) for i in obj]
+    elif isinstance(obj, dict):
+        return {k: recursive_to_dict(v) for k, v in obj.items()}
+    else:
+        return obj
