@@ -63,8 +63,7 @@ const Dashboard = () => {
           ))
         }
         arrow
-      >
-        <Typography component="span">{preemptedCondition.type}</Typography>
+      >{preemptedCondition.type}
       </Tooltip>
     );
   };
