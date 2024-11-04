@@ -21,7 +21,7 @@ const Dashboard = () => {
     if (kueueData) {
       setQueues(kueueData.queues.items || []);
       setWorkloads(kueueData.workloads.items || []);
-      setWorkloadsByUid(kueueData.workloads_by_uid || {}); // Set workloads_by_uid
+      setWorkloadsByUid(kueueData.workloads.workloads_by_uid || {}); // Set workloads_by_uid
 
       kueueData.workloads.items.forEach(workload => {
         if (workload.preemption?.preempted) {
