@@ -13,6 +13,7 @@ const Dashboard = () => {
   const [expandedRows, setExpandedRows] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [workloadsByUid, setWorkloadsByUid] = useState({});
 
   const { data: kueueData, error: kueueError } = useWebSocket('ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/kueue');
 
@@ -20,6 +21,7 @@ const Dashboard = () => {
     if (kueueData) {
       setQueues(kueueData.queues.items || []);
       setWorkloads(kueueData.workloads.items || []);
+      setWorkloadsByUid(kueueData.workloads_by_uid || {}); // Set workloads_by_uid
 
       kueueData.workloads.items.forEach(workload => {
         if (workload.preemption?.preempted) {
@@ -82,7 +84,7 @@ const Dashboard = () => {
               <TableCell className="queue-name-column">Queue Name</TableCell>
               <TableCell className="admission-status-column">Admission Status</TableCell>
               <TableCell className="cluster-queue-column">Cluster Queue Admission</TableCell>
-              <TableCell className="preempted-column">Preempted</TableCell>
+              <TableCell className="preempted-column">Preemption</TableCell>
               <TableCell className="priority-column">Priority</TableCell>
               <TableCell className="priority-class-column">Priority Class Name</TableCell>
             </TableRow>
@@ -94,7 +96,8 @@ const Dashboard = () => {
               const pods = workload.pods || [];
 
               const preemptedCondition = workload.status?.conditions?.find(cond => cond.reason === "Preempted" && cond.status === "True");
-              const preemptedText = preemptedCondition ? `Yes: ${preemptedCondition.message}` : "No";
+              //const preemptedText = preemptedCondition ? `${preemptedCondition.type}: ${preemptedCondition.message}` : "";
+              const preemptedText = preemptedCondition ? `${preemptedCondition.type}: ${preemptedCondition.message.replace(/\(UID: (\w+)\)/, (match, uid) => workloadsByUid[uid] ? `(UID: <Link to="/workload/${workloadsByUid[uid]}">${uid}</Link>)` : match)}` : "";
 
               return (
                 <React.Fragment key={workload.metadata.name}>
@@ -116,8 +119,8 @@ const Dashboard = () => {
                     <TableCell className="admission-status-column">
                       {(() => {
                         const admittedCondition = workload.status?.conditions?.find(cond => cond.type === "Admitted");
-                        const admissionStatus = admittedCondition && admittedCondition.status === "True" ? "Admitted" : "Not admitted";
-                        return `${admissionStatus}: ${admittedCondition?.reason || "N/A"}`;
+                        const admissionStatus = admittedCondition && admittedCondition.status === "True" ? "" : "Not admitted:";
+                        return `${admissionStatus} ${admittedCondition?.reason || "N/A"}`;
                       })()}
                     </TableCell>
                     <TableCell className="cluster-queue-column">

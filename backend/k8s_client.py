@@ -143,6 +143,7 @@ def get_workloads():
                     pod_map[job_uid] = [pod_entry]
 
         # Attach the corresponding pods to each workload
+        workloads_by_uid = {}
         for workload in workloads['items']:
             job_uid = workload['metadata']['labels'].get("kueue.x-k8s.io/job-uid")
             workload['pods'] = pod_map.get(job_uid, [])
@@ -155,10 +156,17 @@ def get_workloads():
                 'preempted': preempted,
                 'reason': preemption_reason
             }
-            start_time = time.time()
-            print(f"DEBUG: about to return workloads:\n {json.dumps(workloads)}")
-            print(f"DEBUG: Print time: {time.time() - start_time} seconds")
-        return workloads
+
+            # Add to workloads_by_uid map
+            workload_name = workload['metadata']['name']
+            workload_uid = workload['metadata']['uid']
+            workloads_by_uid[workload_name] = workload_uid
+
+        # Return workloads and workloads_by_uid as part of the response
+        return {
+            "items": workloads['items'],
+            "workloads_by_uid": workloads_by_uid
+        }
     except client.ApiException as e:
         print(f"Error fetching workloads: {e.status} {e.reason} - {e.body}")
         return {"error": e.body}
