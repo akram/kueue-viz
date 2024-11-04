@@ -83,6 +83,63 @@ const ClusterQueueDetail = () => {
       </Grid>
 
 
+      {/* Flavors Reservation Section */}
+      <Typography variant="h5" gutterBottom style={{ marginTop: "20px" }}>
+        Flavors Reservation
+      </Typography>
+      <TableContainer component={Paper} style={{ marginTop: "20px" }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Flavor Name</TableCell>
+              <TableCell>Resource</TableCell>
+              <TableCell>Total</TableCell>
+              <TableCell>Borrowed</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {clusterQueue.status?.flavorsReservation?.map((flavor) =>
+              flavor.resources.map((resource) => (
+                <TableRow key={`${flavor.name}-${resource.name}`}>
+                  <TableCell>{flavor.name}</TableCell>
+                  <TableCell>{resource.name}</TableCell>
+                  <TableCell>{resource.total}</TableCell>
+                  <TableCell>{resource.borrowed}</TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* Flavors Usage Section */}
+      <Typography variant="h5" gutterBottom style={{ marginTop: "20px" }}>
+        Flavors Usage
+      </Typography>
+      <TableContainer component={Paper} style={{ marginTop: "20px" }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Flavor Name</TableCell>
+              <TableCell>Resource</TableCell>
+              <TableCell>Total</TableCell>
+              <TableCell>Borrowed</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {clusterQueue.status?.flavorsUsage?.map((flavor) =>
+              flavor.resources.map((resource) => (
+                <TableRow key={`${flavor.name}-${resource.name}`}>
+                  <TableCell>{flavor.name}</TableCell>
+                  <TableCell>{resource.name}</TableCell>
+                  <TableCell>{resource.total}</TableCell>
+                  <TableCell>{resource.borrowed}</TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
       {/* Existing Resource Groups table code here */}
       {/* Resource Groups Section */}
