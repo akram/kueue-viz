@@ -135,10 +135,10 @@ const Dashboard = () => {
                         <Table size="small">
                           <TableHead>
                             <TableRow>
-                              <TableCell className="icon-column">|</TableCell>
-                              <TableCell className="name-column">Pod Name</TableCell>
-                              <TableCell className="pods-count-column">Status</TableCell>
-                              <TableCell>Pending Reason</TableCell>
+                              <TableCell className="tree-indicator-column">|</TableCell>
+                              <TableCell className="pod-name-column">Pod Name</TableCell>
+                              <TableCell className="pod-status-column">Status</TableCell>
+                              <TableCell className="pod-reason-column">Pending Reason</TableCell>
                             </TableRow>
                           </TableHead>
                           <TableBody>
@@ -149,12 +149,12 @@ const Dashboard = () => {
                               );
                               return (
                                 <TableRow key={pod.name}>
-                                  <TableCell className="icon-column">
+                                  <TableCell className="tree-indicator-column">
                                     <span style={{ color: '#888' }}>⎯</span>
                                   </TableCell>
-                                  <TableCell className="name-column">{pod.name}</TableCell>
-                                  <TableCell className="pods-count-column">{podPhase}</TableCell>
-                                  <TableCell>
+                                  <TableCell className="pod-name-column">{pod.name}</TableCell>
+                                  <TableCell className="pod-status-column">{podPhase}</TableCell>
+                                  <TableCell className="pod-reason-column">
                                     {podPhase === "Pending" && pendingCondition ? (
                                       <Tooltip title={`${pendingCondition.reason}: ${pendingCondition.message}`}>
                                         <Typography color="error">{pendingCondition.reason}</Typography>

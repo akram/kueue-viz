@@ -52,10 +52,7 @@ tbody.tr.td {
   width: 5%;
 }
 
-.name-column {
-  flex: 2;
-}
-
+.name-column,
 .pods-count-column,
 .queue-name-column,
 .admission-status-column,
@@ -63,5 +60,21 @@ tbody.tr.td {
 .preempted-column,
 .priority-column,
 .priority-class-column {
-  flex: 1;
+  width: auto; /* Allowing them to expand relative to their content */
+}
+
+.tree-indicator-column {
+  width: 5%;
+}
+
+.pod-name-column {
+  width: 30%;
+}
+
+.pod-status-column {
+  width: 20%;
+}
+
+.pod-reason-column {
+  width: 40%;
 }
