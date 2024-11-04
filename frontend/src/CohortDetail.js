@@ -43,14 +43,30 @@ const CohortDetail = () => {
             <TableHead>
               <TableRow>
                 <TableCell>Queue Name</TableCell>
-                <TableCell>Details</TableCell>
+                <TableCell colSpan={2} align="center">Flavor Fungibility</TableCell>
+                <TableCell colSpan={3} align="center">Preemption</TableCell>
+                <TableCell>Queueing Strategy</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell></TableCell>
+                <TableCell>When Can Borrow</TableCell>
+                <TableCell>When Can Preempt</TableCell>
+                <TableCell>Borrow Within Cohort</TableCell>
+                <TableCell>Reclaim Within Cohort</TableCell>
+                <TableCell>Within Cluster Queue</TableCell>
+                <TableCell></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {cohortDetails.clusterQueues.map((queue) => (
                 <TableRow key={queue.name}>
                   <TableCell>{queue.name}</TableCell>
-                  <TableCell>{JSON.stringify(queue.spec)}</TableCell>
+                  <TableCell>{queue.spec.flavorFungibility?.whenCanBorrow || "N/A"}</TableCell>
+                  <TableCell>{queue.spec.flavorFungibility?.whenCanPreempt || "N/A"}</TableCell>
+                  <TableCell>{queue.spec.preemption?.borrowWithinCohort?.policy || "N/A"}</TableCell>
+                  <TableCell>{queue.spec.preemption?.reclaimWithinCohort || "N/A"}</TableCell>
+                  <TableCell>{queue.spec.preemption?.withinClusterQueue || "N/A"}</TableCell>
+                  <TableCell>{queue.spec.queueingStrategy || "N/A"}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
