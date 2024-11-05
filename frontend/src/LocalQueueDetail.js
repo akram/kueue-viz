@@ -4,6 +4,7 @@ import { Typography, Paper, Grid, CircularProgress, Table, TableBody, TableCell,
 import useWebSocket from './useWebSocket';
 import FlavorTable from './FlavorTable';
 import './App.css';
+import { Link } from 'react-router-dom';
 
 const LocalQueueDetail = () => {
   const { queueName } = useParams();
@@ -72,18 +73,10 @@ const LocalQueueDetail = () => {
       </TableContainer>
 
       {/* Reusable FlavorTable Component for Flavor Usage */}
-      <FlavorTable 
-        title="Flavor Usage" 
-        flavorData={queue.status?.flavorUsage} 
-        linkToFlavor={true} 
-      />
+      <FlavorTable title="Flavor Usage" flavorData={queue.status?.flavorUsage} linkToFlavor={true} />
 
       {/* Reusable FlavorTable Component for Flavors Reservation */}
-      <FlavorTable 
-        title="Flavors Reservation" 
-        flavorData={queue.status?.flavorsReservation} 
-        linkToFlavor={true} 
-      />
+      <FlavorTable title="Flavors Reservation" flavorData={queue.status?.flavorsReservation} linkToFlavor={true} />
 
       <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>Admitted Workloads</Typography>
       <TableContainer component={Paper}>
