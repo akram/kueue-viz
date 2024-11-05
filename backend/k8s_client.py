@@ -188,6 +188,7 @@ def slim_down_pod_status(pod_status):
 
 def get_workload_by_name(workload_name: str):
     try:
+        # Fetch the workload details
         workload = k8s_api.get_namespaced_custom_object(
             group="kueue.x-k8s.io",
             version="v1beta1",
@@ -195,19 +196,35 @@ def get_workload_by_name(workload_name: str):
             plural="workloads",
             name=workload_name
         )
+
         # Add preemption details if available
         preempted = workload.get('status', {}).get('preempted', False)
         preemption_reason = workload.get('status', {}).get('preemptionReason', 'None')
-
         workload['preemption'] = {
             'preempted': preempted,
             'reason': preemption_reason
         }
 
+        # Get the local queue name from workload's spec
+        local_queue_name = workload.get('spec', {}).get('queueName')
+        if local_queue_name:
+            # Fetch the local queue associated with the workload
+            local_queue = k8s_api.get_namespaced_custom_object(
+                group="kueue.x-k8s.io",
+                version="v1beta1",
+                namespace=namespace,
+                plural="localqueues",
+                name=local_queue_name
+            )
+            # Retrieve the targeted cluster queue name from the local queue's spec
+            cluster_queue_name = local_queue.get('spec', {}).get('clusterQueue')
+            workload['clusterQueueName'] = cluster_queue_name if cluster_queue_name else "Unknown"
+
         return workload
     except client.ApiException as e:
         print(f"Error fetching workload {workload_name}: {e}")
         return None
+
 
 def get_events_by_workload_name(workload_name: str):
     """

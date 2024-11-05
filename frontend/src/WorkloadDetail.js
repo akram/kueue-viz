@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Typography, Paper, CircularProgress, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { Typography, Link, Paper, CircularProgress, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import useWebSocket from './useWebSocket';
 import './App.css';
 
@@ -29,7 +29,12 @@ const WorkloadDetail = () => {
       <Typography variant="h4" gutterBottom>Workload Detail: {workloadName}</Typography>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
-          <Typography variant="body1"><strong>Queue Name:</strong> {workload.spec?.queueName || 'N/A'}</Typography>
+          <Typography variant="body1">
+            <strong>Queue Name:</strong>
+            <Link to={`/local-queue/${workload.spec?.queueName}`}>{workload.spec?.queueName}</Link>
+            {" → "}
+            <Link to={`/cluster-queue/${workload.clusterQueueName}`}>{workload.clusterQueueName}</Link>
+          </Typography>
           <Typography variant="body1"><strong>Status:</strong> {workload.status?.state || 'Unknown'}</Typography>
           <Typography variant="body1"><strong>Priority:</strong> {workload.spec?.priority || 'N/A'}</Typography>
           <Typography variant="body1"><strong>Priority Class Name:</strong> {workload.spec?.priorityClassName || 'N/A'}</Typography>
