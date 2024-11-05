@@ -7,7 +7,7 @@ import FlavorTable from './FlavorTable';
 
 const ClusterQueueDetail = () => {
   const { clusterQueueName } = useParams();
-  const url = `ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/cluster-queue/${clusterQueueName}`;
+  const url = `/ws/cluster-queue/${clusterQueueName}`;
   const { data: clusterQueueData, error } = useWebSocket(url);
 
   const [clusterQueue, setClusterQueue] = useState(null);

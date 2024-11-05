@@ -6,7 +6,7 @@ import './App.css';
 
 const ResourceFlavorDetail = () => {
   const { flavorName } = useParams();
-  const url = `ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/resource-flavor/${flavorName}`;
+  const url = `/ws/resource-flavor/${flavorName}`;
   const { data: flavorData, error } = useWebSocket(url);
 
   const [flavor, setFlavor] = useState(null);

@@ -6,7 +6,7 @@ import './App.css';
 
 const CohortDetail = () => {
   const { cohortName } = useParams();
-  const url = `ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/cohort/${cohortName}`;
+  const url = `/ws/cohort/${cohortName}`;
   const { data: cohortData, error } = useWebSocket(url);
 
   const [cohortDetails, setCohortDetails] = useState(null);

@@ -8,8 +8,8 @@ import { Link } from 'react-router-dom';
 
 const LocalQueueDetail = () => {
   const { queueName } = useParams();
-  const queueUrl = `ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/local-queue/${queueName}`;
-  const workloadsUrl = `ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/local-queue/${queueName}/workloads`;
+  const queueUrl = `/ws/local-queue/${queueName}`;
+  const workloadsUrl = `/ws/local-queue/${queueName}/workloads`;
 
   const { data: queueData, error: queueError } = useWebSocket(queueUrl);
   const { data: workloadsData, error: workloadsError } = useWebSocket(workloadsUrl);

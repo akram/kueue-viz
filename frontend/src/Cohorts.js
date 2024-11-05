@@ -5,7 +5,7 @@ import useWebSocket from './useWebSocket';
 import './App.css';
 
 const Cohorts = () => {
-  const { data: cohorts, error } = useWebSocket('ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/cohorts');
+  const { data: cohorts, error } = useWebSocket('/ws/cohorts');
   const [cohortList, setCohortList] = useState([]);
 
   useEffect(() => {

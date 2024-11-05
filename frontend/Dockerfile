@@ -10,13 +10,14 @@ COPY . .
 RUN npm run build
 
 # Step 2: Serve the app with Nginx
-FROM nginx:stable-alpine
-COPY --from=build /app/build /usr/share/nginx/html
+# FROM nginx:stable-alpine
+# COPY --from=build /app/build /usr/share/nginx/html
 
 # Expose port 80 to the outside world
-EXPOSE 80
+# EXPOSE 80
+EXPOSE 8080
 
-# Start Nginx
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT npx react-inject-env set && nginx -g daemon off;
+
 
 

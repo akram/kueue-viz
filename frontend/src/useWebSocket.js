@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
+import { env } from './env'
+
+const websocketURL = env.REACT_APP_WEBSOCKET_URL;
 
 const useWebSocket = (url) => {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
-
+  const fullUrl = `${websocketURL}${url}`;
   useEffect(() => {
-    const ws = new WebSocket(url);
+    const ws = new WebSocket(fullUrl);
 
     ws.onopen = () => {
-      console.log(`Connected to WebSocket: ${url}`);
+      console.log(`Connected to WebSocket: ${fullUrl}`);
     };
 
     ws.onmessage = (event) => {

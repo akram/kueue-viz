@@ -5,7 +5,7 @@ import useWebSocket from './useWebSocket';
 import './App.css';
 
 const LocalQueues = () => {
-  const { data: localQueues, error } = useWebSocket('ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/local-queues');
+  const { data: localQueues, error } = useWebSocket('/ws/local-queues');
   const [queues, setQueues] = useState([]);
 
   useEffect(() => {

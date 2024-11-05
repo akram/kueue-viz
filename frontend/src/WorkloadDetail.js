@@ -6,8 +6,8 @@ import './App.css';
 
 const WorkloadDetail = () => {
   const { workloadName } = useParams();
-  const workloadUrl = `ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/workload/${workloadName}`;
-  const eventsUrl = `ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/workload/${workloadName}/events`;
+  const workloadUrl = `/ws/workload/${workloadName}`;
+  const eventsUrl = `/ws/workload/${workloadName}/events`;
 
   const { data: workload, error: workloadError } = useWebSocket(workloadUrl);
   const { data: eventData, error: eventError } = useWebSocket(eventsUrl);

@@ -5,27 +5,26 @@
   "description": "Frontend dashboard for visualizing Kueue status",
   "main": "src/index.js",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "start": "SKIP_PREFLIGHT_CHECK=true react-scripts start",
+    "build": "SKIP_PREFLIGHT_CHECK=true react-scripts build"
   },
   "dependencies": {
-    "axios": "^0.27.2",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "react-scripts": "^5.0.0",
-    "react-chartjs-2": "^4.0.0",
-    "chart.js": "^3.5.0",
-    "@mui/material": "^5.0.0",
-    "@mui/icons-material": "^5.0.0",
     "@emotion/react": "^11.0.0",
     "@emotion/styled": "^11.0.0",
-    "react-toastify": "^9.1.1",
-    "react-router-dom": "^6.0.0" 
+    "@mui/icons-material": "^5.0.0",
+    "@mui/material": "^5.0.0",
+    "axios": "^0.27.2",
+    "chart.js": "^3.5.0",
+    "react": "^18.0.0",
+    "react-chartjs-2": "^4.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.0.0",
+    "react-scripts": "^5.0.0",
+    "react-toastify": "^9.1.1"
   },
   "devDependencies": {
-     "@babel/plugin-proposal-private-property-in-object": "7.18.6" 
+    "@babel/plugin-proposal-private-property-in-object": "7.18.6",
+    "react-inject-env": "^2.1.0"
   },
   "browserslist": {
     "production": [
@@ -42,4 +41,3 @@
   "author": "Akram Ben Aissi",
   "license": "MIT"
 }
-

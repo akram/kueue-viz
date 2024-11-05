@@ -5,7 +5,7 @@ import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHe
 import './App.css';
 
 const ClusterQueues = () => {
-  const { data: clusterQueues, error } = useWebSocket('ws://backend-keue-viz.apps.rosa.akram.q1gr.p3.openshiftapps.com/ws/cluster-queues');
+  const { data: clusterQueues, error } = useWebSocket('/ws/cluster-queues');
   const [queues, setQueues] = useState([]);
 
   useEffect(() => {
