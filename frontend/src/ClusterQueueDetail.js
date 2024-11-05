@@ -174,7 +174,7 @@ const ClusterQueueDetail = () => {
                           {/* Display Queue Name with rowSpan across all flavors and resources */}
                           {resIndex === 0 && resResourceIndex === 0 && (
                             <TableCell rowSpan={queue.reservation.reduce((acc, flavor) => acc + (flavor.resources?.length || 0), 0)}>
-                              <Link to={`/cluster-queue/${queue.name}`}>{queue.name}</Link>
+                              <Link to={`/local-queue/${queue.name}`}>{queue.name}</Link>
                             </TableCell>
                           )}
 
