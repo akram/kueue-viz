@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams,Link } from 'react-router-dom';
 import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, CircularProgress } from '@mui/material';
 import useWebSocket from './useWebSocket';
 import './App.css';
@@ -61,7 +61,7 @@ const CohortDetail = () => {
             <TableBody>
               {cohortDetails.clusterQueues.map((queue) => (
                 <TableRow key={queue.name}>
-                  <TableCell>{queue.name}</TableCell>
+                  <TableCell><Link to={`/cluster-queue/${queue.name}`}>{queue.name}</Link></TableCell>
                   <TableCell>{queue.spec.flavorFungibility?.whenCanBorrow || "N/A"}</TableCell>
                   <TableCell>{queue.spec.flavorFungibility?.whenCanPreempt || "N/A"}</TableCell>
                   <TableCell>{queue.spec.preemption?.borrowWithinCohort?.policy || "N/A"}</TableCell>
