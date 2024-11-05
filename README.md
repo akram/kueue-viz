@@ -44,3 +44,11 @@ oc set env deployment/frontend REACT_APP_BACKEND_URL=https://$BACKEND_URL \
                                REACT_APP_WEBSOCKET_URL=wss://$BACKEND_URL
 ```
 
+
+## Test apps
+
+```
+oc create -f https://raw.githubusercontent.com/opendatahub-io/distributed-workloads/2c6a14f792b8d94ad3fc2146316e52ace33b6a1e/examples/kueue-usage/kueue-with-jobs/00-common.yaml
+```
+And check that you have some data in the Resource Flavors tab of the application.
+
