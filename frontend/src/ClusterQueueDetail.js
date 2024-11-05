@@ -84,18 +84,6 @@ const ClusterQueueDetail = () => {
         </Grid>
       </Grid>
 
-
-
-      {/* Flavor Reservation Table */}
-      <FlavorTable title="Flavor Reservation" flavorData={clusterQueue.status?.flavorsReservation} linkToFlavor={true} 
-                   showBorrowingColumn={true} />
-
-      {/* Flavor Usage Table */}
-      <FlavorTable title="Flavor Usage" flavorData={clusterQueue.status?.flavorsUsage} linkToFlavor={true} 
-                   showBorrowingColumn={true} />
-
-
-
       {/* Resource Groups Section */}
       <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>
         Resource Groups (Quotas)
@@ -145,11 +133,18 @@ const ClusterQueueDetail = () => {
         </TableContainer>
       )}
 
+      {/* Flavor Reservation Table */}
+      <FlavorTable title="Flavor Reservation" flavorData={clusterQueue.status?.flavorsReservation} linkToFlavor={true} 
+                   showBorrowingColumn={true} />
+
+      {/* Flavor Usage Table */}
+      <FlavorTable title="Flavor Usage" flavorData={clusterQueue.status?.flavorsUsage} linkToFlavor={true} 
+                   showBorrowingColumn={true} />
+
       {/* Local Queues Section */}
       <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>
         Local Queues Using This Cluster Queue
       </Typography>
-
       {clusterQueue.queues && clusterQueue.queues.length === 0 ? (
         <Typography>No local queues are using this cluster queue.</Typography>
       ) : (
