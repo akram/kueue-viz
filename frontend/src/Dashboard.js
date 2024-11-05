@@ -6,6 +6,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import useWebSocket from './useWebSocket';
 import './App.css';
+import { AccessTime, CheckCircle } from '@mui/icons-material';
 
 const Dashboard = () => {
   const [queues, setQueues] = useState([]);
@@ -109,6 +110,7 @@ const Dashboard = () => {
               <TableCell className="icon-column"></TableCell>
               <TableCell className="name-column">Name</TableCell>
               <TableCell className="pods-count-column">Pods Count</TableCell>
+              <TableCell className="status-column">Status</TableCell>
               <TableCell className="queue-name-column">Queue Name</TableCell>
               <TableCell className="admission-status-column">Admission Status</TableCell>
               <TableCell className="cluster-queue-column">Cluster Queue Admission</TableCell>
@@ -124,7 +126,11 @@ const Dashboard = () => {
               const pods = workload.pods || [];
 
               const preemptedCondition = workload.status?.conditions?.find(cond => cond.reason === "Preempted" && cond.status === "True");
-
+              // Determine Finished status
+              const finishedCondition = workload.status?.conditions?.find(
+                cond => cond.type === "Finished" && cond.status === "True"
+              );
+              const statusIcon = finishedCondition ? <CheckCircle style={{ color: "green" }} /> : <AccessTime style={{ color: "orange" }} />;
               return (
                 <React.Fragment key={workload.metadata.name}>
                   <TableRow>
@@ -139,6 +145,7 @@ const Dashboard = () => {
                       </Link>
                     </TableCell>
                     <TableCell className="pods-count-column">{podCount}</TableCell>
+                    <TableCell className="status-column">{statusIcon}</TableCell>
                     <TableCell className="queue-name-column">
                       <Link to={`/local-queue/${workload.spec.queueName}`}>{workload.spec.queueName}</Link>
                     </TableCell>
