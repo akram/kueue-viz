@@ -85,20 +85,14 @@ const ClusterQueueDetail = () => {
 
 
       {/* Flavor Reservation Table */}
-      <FlavorTable 
-        title="Flavor Reservation"
-        flavorData={clusterQueue.status?.flavorsReservation}
-        linkToFlavor={true} 
-      />
+      <FlavorTable title="Flavor Reservation" flavorData={clusterQueue.status?.flavorsReservation} linkToFlavor={true} 
+                   showBorrowingColumn={true} />
 
       {/* Flavor Usage Table */}
-      <FlavorTable 
-        title="Flavor Usage"
-        flavorData={clusterQueue.status?.flavorsUsage}
-        linkToFlavor={true} 
-      />
+      <FlavorTable title="Flavor Usage" flavorData={clusterQueue.status?.flavorsUsage} linkToFlavor={true} 
+                   showBorrowingColumn={true} />
 
-      
+
 
       {/* Resource Groups Section */}
       <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>

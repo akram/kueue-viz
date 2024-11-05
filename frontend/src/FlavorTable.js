@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper } from '@mui/material';
 import './App.css';
 
-const FlavorTable = ({ title, flavorData, linkToFlavor }) => (
+const FlavorTable = ({ title, flavorData, linkToFlavor, showBorrowingColumn }) => (
   <>
     <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>{title}</Typography>
     <TableContainer component={Paper}>
@@ -13,7 +13,7 @@ const FlavorTable = ({ title, flavorData, linkToFlavor }) => (
             <TableCell>Flavor Name</TableCell>
             <TableCell>Resource</TableCell>
             <TableCell>Total</TableCell>
-            <TableCell>Borrowed</TableCell>
+            {showBorrowingColumn && <TableCell>Borrowed</TableCell>}
           </TableRow>
         </TableHead>
         <TableBody>
@@ -35,7 +35,7 @@ const FlavorTable = ({ title, flavorData, linkToFlavor }) => (
                   )}
                   <TableCell>{resource.name}</TableCell>
                   <TableCell>{resource.total}</TableCell>
-                  <TableCell>{resource.borrowed}</TableCell>
+                  {showBorrowingColumn && <TableCell>{resource.borrowed || "N/A"}</TableCell>}
                 </TableRow>
               ))}
             </React.Fragment>
