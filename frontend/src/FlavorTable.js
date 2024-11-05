@@ -13,6 +13,7 @@ const FlavorTable = ({ title, flavorData, linkToFlavor }) => (
             <TableCell>Flavor Name</TableCell>
             <TableCell>Resource</TableCell>
             <TableCell>Total</TableCell>
+            <TableCell>Borrowed</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -34,6 +35,7 @@ const FlavorTable = ({ title, flavorData, linkToFlavor }) => (
                   )}
                   <TableCell>{resource.name}</TableCell>
                   <TableCell>{resource.total}</TableCell>
+                  <TableCell>{resource.borrowed}</TableCell>
                 </TableRow>
               ))}
             </React.Fragment>
@@ -45,4 +47,3 @@ const FlavorTable = ({ title, flavorData, linkToFlavor }) => (
 );
 
 export default FlavorTable;
-

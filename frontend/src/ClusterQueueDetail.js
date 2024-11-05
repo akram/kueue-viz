@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import useWebSocket from './useWebSocket';
 import './App.css';
+import FlavorTable from './FlavorTable';
 
 const ClusterQueueDetail = () => {
   const { clusterQueueName } = useParams();
@@ -83,69 +84,22 @@ const ClusterQueueDetail = () => {
       </Grid>
 
 
-      {/* Flavors Reservation Section */}
-      <Typography variant="h5" gutterBottom style={{ marginTop: "20px" }}>
-        Flavors Reservation
-      </Typography>
-      <TableContainer component={Paper} style={{ marginTop: "20px" }}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Flavor Name</TableCell>
-              <TableCell>Resource</TableCell>
-              <TableCell>Total</TableCell>
-              <TableCell>Borrowed</TableCell>
-              <TableCell>-</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {clusterQueue.status?.flavorsReservation?.map((flavor) =>
-              flavor.resources.map((resource) => (
-                <TableRow key={`${flavor.name}-${resource.name}`}>
-                  <TableCell>{flavor.name}</TableCell>
-                  <TableCell>{resource.name}</TableCell>
-                  <TableCell>{resource.total}</TableCell>
-                  <TableCell>{resource.borrowed}</TableCell>
-                  <TableCell>-</TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      {/* Flavor Reservation Table */}
+      <FlavorTable 
+        title="Flavor Reservation"
+        flavorData={clusterQueue.status?.flavorsReservation}
+        linkToFlavor={true} 
+      />
 
-      {/* Flavors Usage Section */}
-      <Typography variant="h5" gutterBottom style={{ marginTop: "20px" }}>
-        Flavors Usage
-      </Typography>
-      <TableContainer component={Paper} style={{ marginTop: "20px" }}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Flavor Name</TableCell>
-              <TableCell>Resource</TableCell>
-              <TableCell>Total</TableCell>
-              <TableCell>Borrowed</TableCell>
-              <TableCell>-</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {clusterQueue.status?.flavorsUsage?.map((flavor) =>
-              flavor.resources.map((resource) => (
-                <TableRow key={`${flavor.name}-${resource.name}`}>
-                  <TableCell>{flavor.name}</TableCell>
-                  <TableCell>{resource.name}</TableCell>
-                  <TableCell>{resource.total}</TableCell>
-                  <TableCell>{resource.borrowed}</TableCell>
-                  <TableCell>-</TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      {/* Flavor Usage Table */}
+      <FlavorTable 
+        title="Flavor Usage"
+        flavorData={clusterQueue.status?.flavorsUsage}
+        linkToFlavor={true} 
+      />
 
-      {/* Existing Resource Groups table code here */}
+      
+
       {/* Resource Groups Section */}
       <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>
         Resource Groups (Quotas)
