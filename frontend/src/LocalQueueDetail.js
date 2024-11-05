@@ -40,7 +40,7 @@ const LocalQueueDetail = () => {
           <Typography variant="body1"><strong>Creation Timestamp:</strong> {new Date(queue.metadata?.creationTimestamp).toLocaleString()}</Typography>
         </Grid>
         <Grid item xs={12} sm={6}>
-          <Typography variant="body1"><strong>Cluster Queue:</strong> {queue.spec?.clusterQueue}</Typography>
+          <Typography variant="body1"><strong>Cluster Queue:</strong><Link to={`/cluster-queue/${queue.spec?.clusterQueue}`}>{queue.spec?.clusterQueue}</Link></Typography>
           <Typography variant="body1"><strong>Admitted Workloads:</strong> {queue.status?.admittedWorkloads}</Typography>
           <Typography variant="body1"><strong>Pending Workloads:</strong> {queue.status?.pendingWorkloads}</Typography>
           <Typography variant="body1"><strong>Reserving Workloads:</strong> {queue.status?.reservingWorkloads}</Typography>
