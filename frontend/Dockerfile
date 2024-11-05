@@ -1,5 +1,6 @@
 # Step 1: Build the React app
 FROM node:16 AS build
+#FROM node:16.10-slim
 
 WORKDIR /app
 COPY package*.json ./
@@ -17,7 +18,7 @@ RUN npm run build
 # EXPOSE 80
 EXPOSE 8080
 
-ENTRYPOINT npx react-inject-env set && nginx -g daemon off;
+ENTRYPOINT npx react-inject-env set && npx http-server build
 
 
 
