@@ -17,34 +17,30 @@ oc adm policy add-cluster-role-to-user cluster-admin -z default
 ## Build apps
 
 ```
-for i in  backend service frontend 
+for i in  backend frontend 
 do
-   oc new-build --name $i --context-dir=$i .
+   oc new-build . --name $i --context-dir=$i 
 done
 ```
 
 ## Deploy apps
 ```
 oc new-app backend  --name=backend
-oc new-app service  --name=service
 oc new-app frontend --name=frontend
 ```
 
 ## Expose apps
 ```
-oc expose svc/backend
-oc expose svc/frontend
+oc create route edge --service=svc/backend
+oc create route edge --service=svc/frontend
 ```
 
 ## Configure apps
 ```
 BACKEND_URL=$(oc get route backend -o jsonpath='{.spec.host}')
 FRONTEND_URL=$(oc get route frontend -o jsonpath='{.spec.host}')
-oc set env deployment/backend  FRONTEND_URL=http://$FRONTEND_URL
-oc set env deployment/frontend REACT_APP_BACKEND_URL=$BACKEND_URL
+oc set env deployment/backend  FRONTEND_URL=https://$FRONTEND_URL
+oc set env deployment/frontend REACT_APP_BACKEND_URL=https://$BACKEND_URL \
+                               REACT_APP_WEBSOCKET_URL=wss://$BACKEND_URL
 ```
-
-
-
-
 
