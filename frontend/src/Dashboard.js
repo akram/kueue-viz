@@ -92,9 +92,13 @@ const Dashboard = () => {
 
         <Grid item xs={12} sm={6} md={4}>
           <Paper elevation={3} style={{ padding: '16px' }}>
-            <Typography variant="h6">Pending Workloads</Typography>
+            <Typography variant="h6">Completed Workloads</Typography>
             <Typography variant="h3">
-              {workloads.filter(wl => wl.status?.state === "Pending").length}
+              {workloads.filter(wl => 
+                wl.status?.conditions?.some(
+                  condition => condition.type === "Finished" && condition.status === "True"
+                )
+              ).length}
             </Typography>
           </Paper>
         </Grid>

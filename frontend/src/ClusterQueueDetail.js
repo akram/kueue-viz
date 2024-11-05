@@ -36,7 +36,9 @@ const ClusterQueueDetail = () => {
           <Typography variant="body1"><strong>Name:</strong> {clusterQueue.metadata?.name}</Typography>
           <Typography variant="body1"><strong>UID:</strong> {clusterQueue.metadata?.uid}</Typography>
           <Typography variant="body1"><strong>Creation Timestamp:</strong> {new Date(clusterQueue.metadata?.creationTimestamp).toLocaleString()}</Typography>
-        </Grid>
+          <Typography variant="body1"><strong>Cohort:</strong>
+            <Link to={`/cohort/${clusterQueue.spec?.cohort}`}>{clusterQueue.spec?.cohort}</Link>
+          </Typography>        </Grid>
         <Grid item xs={12} sm={6}>
           <Typography variant="body1"><strong>Admitted Workloads:</strong> {clusterQueue.status?.admittedWorkloads}</Typography>
           <Typography variant="body1"><strong>Reserving Workloads:</strong> {clusterQueue.status?.reservingWorkloads}</Typography>
@@ -44,6 +46,22 @@ const ClusterQueueDetail = () => {
         </Grid>
       </Grid>
 
+      {/* Flavor Fungibility Section */}
+      <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>
+        Flavor Fungibility
+      </Typography>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={6}>
+          <Tooltip title="Determines whether to try the next flavor if a workload can borrow in the current one. Possible values: Borrow, TryNextFlavor.">
+            <Typography variant="body1"><strong>When Can Borrow:</strong> {clusterQueue.spec?.flavorFungibility?.whenCanBorrow || 'Default (Borrow)'}</Typography>
+          </Tooltip>
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <Tooltip title="Determines whether to try the next flavor if preemption fails in the current one. Possible values: Preempt, TryNextFlavor.">
+            <Typography variant="body1"><strong>When Can Preempt:</strong> {clusterQueue.spec?.flavorFungibility?.whenCanPreempt || 'Default (TryNextFlavor)'}</Typography>
+          </Tooltip>
+        </Grid>
+      </Grid>
       {/* Preemption Section */}
       <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>
         Preemption Settings
@@ -66,22 +84,6 @@ const ClusterQueueDetail = () => {
         </Grid>
       </Grid>
 
-      {/* Flavor Fungibility Section */}
-      <Typography variant="h5" gutterBottom style={{ marginTop: '20px' }}>
-        Flavor Fungibility
-      </Typography>
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={6}>
-          <Tooltip title="Determines whether to try the next flavor if a workload can borrow in the current one. Possible values: Borrow, TryNextFlavor.">
-            <Typography variant="body1"><strong>When Can Borrow:</strong> {clusterQueue.spec?.flavorFungibility?.whenCanBorrow || 'Default (Borrow)'}</Typography>
-          </Tooltip>
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <Tooltip title="Determines whether to try the next flavor if preemption fails in the current one. Possible values: Preempt, TryNextFlavor.">
-            <Typography variant="body1"><strong>When Can Preempt:</strong> {clusterQueue.spec?.flavorFungibility?.whenCanPreempt || 'Default (TryNextFlavor)'}</Typography>
-          </Tooltip>
-        </Grid>
-      </Grid>
 
 
       {/* Flavor Reservation Table */}
@@ -172,7 +174,7 @@ const ClusterQueueDetail = () => {
                           {/* Display Queue Name with rowSpan across all flavors and resources */}
                           {resIndex === 0 && resResourceIndex === 0 && (
                             <TableCell rowSpan={queue.reservation.reduce((acc, flavor) => acc + (flavor.resources?.length || 0), 0)}>
-                              {queue.name}
+                              <Link to={`/cluster-queue/${queue.name}`}>{queue.name}</Link>
                             </TableCell>
                           )}
 
