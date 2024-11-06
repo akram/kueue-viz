@@ -79,7 +79,7 @@ def get_cluster_queues():
         return [
             {
                 "name": queue["metadata"]["name"],
-                "cohort": queue["spec"]["cohort"],
+                "cohort": queue.get("spec", {}).get("cohort", None),
                 "resourceGroups": queue["spec"]["resourceGroups"],
                 "admittedWorkloads": queue["status"]["admittedWorkloads"],
                 "pendingWorkloads": queue["status"]["pendingWorkloads"],
