@@ -5,7 +5,7 @@ import time
 import datetime
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 # Load Kubernetes configuration for in-cluster access
 config.load_incluster_config()
