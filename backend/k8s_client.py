@@ -31,31 +31,20 @@ __all__ = [
     "remove_managed_fields"
 ]
 
-# Determine the namespace dynamically from the mounted file
-def get_namespace():
-    try:
-        with open("/var/run/secrets/kubernetes.io/serviceaccount/namespace") as f:
-            return f.read().strip()
-    except IOError:
-        # Fallback to "default" if file is not found (useful for testing outside Kubernetes)
-        return "default"
-
-namespace = get_namespace()
-
 def get_local_queues():
     """
     Retrieves local queues within a specific namespace.
     """
     try:
         # Assuming 'localqueues' is the plural name for the local queue custom resources
-        local_queues = k8s_api.list_namespaced_custom_object(
+        local_queues = k8s_api.list_cluster_custom_object(
             group="kueue.x-k8s.io",
             version="v1beta1",
-            namespace=namespace,
             plural="localqueues"
         )
         return [
             {
+                "namespace": item["metadata"]["namespace"],
                 "name": item["metadata"]["name"],
                 "spec": item["spec"],
                 "status": item["status"],
@@ -99,10 +88,9 @@ def get_cluster_queues():
 
 def get_queues():
     try:
-        queues = k8s_api.list_namespaced_custom_object(
+        queues = k8s_api.list_cluster_custom_object(
             group="kueue.x-k8s.io",
             version="v1beta1",
-            namespace=namespace,
             plural="localqueues"
         )
         return remove_managed_fields(queues)
@@ -115,39 +103,37 @@ def get_workloads():
     Retrieves all workloads along with their attached pods based on job-uid.
     """
     try:
-        # Retrieve all workloads
-        workloads = k8s_api.list_namespaced_custom_object(
+        # Retrieve all workloads from the entire cluster
+        workloads = k8s_api.list_cluster_custom_object(
             group="kueue.x-k8s.io",
             version="v1beta1",
-            namespace=namespace,
             plural="workloads"
         )
         workloads = remove_managed_fields(workloads)
-        # Retrieve all pods in the namespace
-        pods = remove_managed_fields(core_api.list_namespaced_pod(namespace=namespace))
-
-        # Map pods by their `controller-uid` label for fast lookup
-        pod_map = {}
-        for pod in pods.items:
-            job_uid = pod.metadata.labels.get("controller-uid")
-            if job_uid:
-                pod_entry = {
-                    "name": pod.metadata.name,
-                    # "phase": pod.status.phase,
-                    # "conditions": pod.status.conditions  # Add the status.phase here
-                    "status": recursive_to_dict(pod.status) if pod.status else {}  # Recursively convert status to dict
-                }
-                if job_uid in pod_map:
-                    pod_map[job_uid].append(pod_entry)
-                else:
-                    pod_map[job_uid] = [pod_entry]
 
         # Attach the corresponding pods to each workload
         workloads_by_uid = {}
         for workload in workloads['items']:
+            namespace = workload['metadata']['namespace']
             job_uid = workload['metadata']['labels'].get("kueue.x-k8s.io/job-uid")
-            workload['pods'] = pod_map.get(job_uid, [])
             
+            # Retrieve pods in the specific namespace of the workload
+            pods = remove_managed_fields(core_api.list_namespaced_pod(namespace=namespace))
+
+            # Map pods by their `controller-uid` label
+            workload_pods = []
+            for pod in pods.items:
+                controller_uid = pod.metadata.labels.get("controller-uid")
+                if controller_uid == job_uid:
+                    pod_entry = {
+                        "name": pod.metadata.name,
+                        "status": recursive_to_dict(pod.status) if pod.status else {}
+                    }
+                    workload_pods.append(pod_entry)
+
+            # Attach pods to the workload
+            workload['pods'] = workload_pods
+
             # Add preemption details if available
             preempted = workload.get('status', {}).get('preempted', False)
             preemption_reason = workload.get('status', {}).get('preemptionReason', 'None')
@@ -172,6 +158,7 @@ def get_workloads():
         return {"error": e.body}
 
 
+
 def slim_down_pod_status(pod_status):
     return {
         "phase": pod_status.get("phase"),
@@ -186,7 +173,7 @@ def slim_down_pod_status(pod_status):
         ]
     }
 
-def get_workload_by_name(workload_name: str):
+def get_workload_by_name(namespace: str, workload_name: str):
     try:
         # Fetch the workload details
         workload = k8s_api.get_namespaced_custom_object(
@@ -226,7 +213,7 @@ def get_workload_by_name(workload_name: str):
         return None
 
 
-def get_events_by_workload_name(workload_name: str):
+def get_events_by_workload_name(namespace: str, workload_name: str):
     """
     Retrieves events related to the given workload.
     """
@@ -349,16 +336,16 @@ def get_resource_flavor_details(flavor_name: str):
 
 
 
-def get_local_queue_details(queue_name: str):
+def get_local_queue_details(namespace_param: str, queue_name: str):
     """
     Retrieves detailed information about a specific LocalQueue.
     """
     try:
-        # Fetch the LocalQueue object
+        # Fetch the LocalQueue object in the specified namespace
         local_queue = k8s_api.get_namespaced_custom_object(
             group="kueue.x-k8s.io",
             version="v1beta1",
-            namespace=namespace,
+            namespace=namespace_param,
             plural="localqueues",
             name=queue_name
         )
@@ -373,17 +360,17 @@ def get_local_queue_details(queue_name: str):
             "status": local_queue.get("status", {}),
         }
     except client.ApiException as e:
-        print(f"Error fetching LocalQueue details for {queue_name}: {e}")
-        return {"error": f"Could not retrieve details for LocalQueue {queue_name}"}
+        logging.error(f"Error fetching LocalQueue details for queue {queue_name} in namespace {namespace_param}: {e}")
+        return {"error": f"Could not retrieve details for LocalQueue {queue_name} in namespace {namespace_param}"}
 
 
-def get_admitted_workloads(queue_name: str):
+def get_admitted_workloads(namespace: str, queue_name: str):
     """
     Retrieves all workloads admitted into the specified LocalQueue.
     """
     try:
         # List all workloads in the namespace
-        workloads = k8s_api.list_namespaced_custom_object(
+        workloads = k8s_api.list_custom_object(
             group="kueue.x-k8s.io",
             version="v1beta1",
             namespace=namespace,
@@ -423,16 +410,16 @@ def get_cluster_queue_details(cluster_queue_name: str):
         )
 
         # Retrieve all local queues and filter based on clusterQueue name
-        local_queues = k8s_api.list_namespaced_custom_object(
+        local_queues = k8s_api.list_cluster_custom_object(
             group="kueue.x-k8s.io",
             version="v1beta1",
-            namespace=namespace,
             plural="localqueues"
         )
 
         # Gather names of local queues that use this cluster queue
         queues_using_cluster_queue = [
             {
+                "namespace": queue["metadata"]["namespace"],
                 "name": queue["metadata"]["name"],
                 "reservation": queue.get("status", {}).get("flavorsReservation"),
                 "usage": queue.get("status", {}).get("flavorUsage")

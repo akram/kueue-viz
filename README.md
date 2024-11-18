@@ -3,7 +3,7 @@
 
 ```
 git clone https://github.com/akram/kueue-viz.git
-oc new-project keue-viz
+oc new-project kueue-viz
 KUEUE_VIZ_HOME=$PWD/kueue-viz
 ```
 

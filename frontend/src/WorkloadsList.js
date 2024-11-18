@@ -42,7 +42,7 @@ const WorkloadsList = ({ workloads }) => {
               </TableCell>
               <TableCell>
                 {workload.spec?.queueName ? (
-                  <Link to={`/local-queue/${workload.spec.queueName}`}>
+                  <Link to={`/local-queue/${workload.metadata.namespace}/${workload.spec.queueName}`}>
                     {workload.spec.queueName}
                   </Link>
                 ) : (

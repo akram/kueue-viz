@@ -5,9 +5,9 @@ import useWebSocket from './useWebSocket';
 import './App.css';
 
 const WorkloadDetail = () => {
-  const { workloadName } = useParams();
-  const workloadUrl = `/ws/workload/${workloadName}`;
-  const eventsUrl = `/ws/workload/${workloadName}/events`;
+  const { namespace, workloadName } = useParams();
+  const workloadUrl = `/ws/workload/${namespace}/${workloadName}`;
+  const eventsUrl = `/ws/workload/${namespace}/${workloadName}/events`;
 
   const { data: workload, error: workloadError } = useWebSocket(workloadUrl);
   const { data: eventData, error: eventError } = useWebSocket(eventsUrl);
@@ -26,12 +26,12 @@ const WorkloadDetail = () => {
 
   return (
     <Paper style={{ padding: '16px', marginTop: '20px' }}>
-      <Typography variant="h4" gutterBottom>Workload Detail: {workloadName}</Typography>
+      <Typography variant="h4" gutterBottom>Workload Detail: {namespace}/{workloadName}</Typography>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
           <Typography variant="body1">
             <strong>Queue Name:</strong>
-            <Link to={`/local-queue/${workload.spec?.queueName}`}>{workload.spec?.queueName}</Link>
+            <Link to={`/local-queue/${namespace}/${workload.spec?.queueName}`}>{workload.spec?.queueName}</Link>
             {" → "}
             <Link to={`/cluster-queue/${workload.clusterQueueName}`}>{workload.clusterQueueName}</Link>
           </Typography>

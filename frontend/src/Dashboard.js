@@ -111,6 +111,7 @@ const Dashboard = () => {
         <Table>
           <TableHead>
             <TableRow>
+              <TableCell className="name-column">Namespace</TableCell>
               <TableCell className="icon-column"></TableCell>
               <TableCell className="name-column">Name</TableCell>
               <TableCell className="pods-count-column">Pods Count</TableCell>
@@ -138,20 +139,21 @@ const Dashboard = () => {
               return (
                 <React.Fragment key={workload.metadata.name}>
                   <TableRow>
-                    <TableCell className="icon-column">
+                  <TableCell className="name-column">{workload.metadata.namespace}</TableCell>
+                  <TableCell className="icon-column">
                       <IconButton onClick={() => toggleRow(workload.metadata.name)}>
                         {isExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
                       </IconButton>
                     </TableCell>
                     <TableCell className="name-column">
-                      <Link to={`/workload/${workload.metadata.name}`}>
+                      <Link to={`/workload/${workload.metadata.namespace}/${workload.metadata.name}`}>
                         {workload.metadata.name}
                       </Link>
                     </TableCell>
                     <TableCell className="pods-count-column">{podCount}</TableCell>
                     <TableCell className="status-column">{statusIcon}</TableCell>
                     <TableCell className="queue-name-column">
-                      <Link to={`/local-queue/${workload.spec.queueName}`}>{workload.spec.queueName}</Link>
+                      <Link to={`/local-queue/${workload.metadata.namespace}/${workload.spec.queueName}`}>{workload.spec.queueName}</Link>
                     </TableCell>
                     <TableCell className="admission-status-column">
                       {(() => {
@@ -172,15 +174,17 @@ const Dashboard = () => {
                     <TableCell className="priority-class-column">{workload.spec.priorityClassName || "N/A"}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell colSpan={9} style={{ paddingBottom: 0, paddingTop: 0 }}>
+                    <TableCell colSpan={11} style={{ paddingBottom: 0, paddingTop: 0 }}>
                       <Collapse in={isExpanded} timeout="auto" unmountOnExit>
                         <Table size="small">
                           <TableHead>
                             <TableRow>
+                            <TableCell className="icon-column"></TableCell>
                               <TableCell className="tree-indicator-column">|</TableCell>
                               <TableCell className="pod-name-column">Pod Name</TableCell>
                               <TableCell className="pod-status-column">Status</TableCell>
                               <TableCell className="pod-reason-column">Pending Reason</TableCell>
+                              <TableCell className=""></TableCell>
                             </TableRow>
                           </TableHead>
                           <TableBody>
@@ -191,9 +195,8 @@ const Dashboard = () => {
                               );
                               return (
                                 <TableRow key={pod.name}>
-                                  <TableCell className="tree-indicator-column">
-                                    <span style={{ color: '#888' }}>⎯</span>
-                                  </TableCell>
+                                  <TableCell className="icon-column"></TableCell>
+                                  <TableCell className="tree-indicator-column"><span style={{ color: '#888' }}>⎯</span></TableCell>
                                   <TableCell className="pod-name-column">{pod.name}</TableCell>
                                   <TableCell className="pod-status-column">{podPhase}</TableCell>
                                   <TableCell className="pod-reason-column">
@@ -205,6 +208,9 @@ const Dashboard = () => {
                                       "N/A"
                                     )}
                                   </TableCell>
+                                  <TableCell className="pod-name-column"></TableCell>
+                                  <TableCell className="pod-name-column"></TableCell>
+                                  <TableCell className="pod-name-column"></TableCell>
                                 </TableRow>
                               );
                             })}

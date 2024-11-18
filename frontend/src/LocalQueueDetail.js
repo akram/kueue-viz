@@ -7,9 +7,9 @@ import './App.css';
 import { Link } from 'react-router-dom';
 
 const LocalQueueDetail = () => {
-  const { queueName } = useParams();
-  const queueUrl = `/ws/local-queue/${queueName}`;
-  const workloadsUrl = `/ws/local-queue/${queueName}/workloads`;
+  const { namespace, queueName } = useParams();
+  const queueUrl = `/ws/local-queue/${namespace}/${queueName}`;
+  const workloadsUrl = `/ws/local-queue/${namespace}/${queueName}/workloads`;
 
   const { data: queueData, error: queueError } = useWebSocket(queueUrl);
   const { data: workloadsData, error: workloadsError } = useWebSocket(workloadsUrl);
@@ -90,7 +90,7 @@ const LocalQueueDetail = () => {
           <TableBody>
             {workloads.map((workload) => (
               <TableRow key={workload.metadata.name}>
-                <TableCell><Link to={`/workload/${workload.metadata.name}`}>{workload.metadata.name}</Link></TableCell>
+                <TableCell><Link to={`/workload/${namespace}/${workload.metadata.name}`}>{workload.metadata.name}</Link></TableCell>
                 <TableCell>{workload.status?.state || "Unknown"}</TableCell>
               </TableRow>
             ))}

@@ -65,17 +65,17 @@ async def get_cluster_queues_endpoint():
     return get_cluster_queues()  # Calls the function defined in k8s_client
 
 
-@app.get("/kueue/workload/{workload_name}")
+@app.get("/kueue/workload/{namespace}/{workload_name}")
 async def get_workload_detail(workload_name: str):
-    workload = get_workload_by_name(workload_name)
+    workload = get_workload_by_name(namespace, workload_name)
     if workload is None:
         raise HTTPException(status_code=404, detail="Workload not found")
     return workload
 
 
-@app.get("/kueue/workload/{workload_name}/events")
+@app.get("/kueue/workload/{namespace}/{workload_name}/events")
 async def get_workload_events(workload_name: str):
-    events = get_events_by_workload_name(workload_name)
+    events = get_events_by_workload_name(namespace, workload_name)
     return events
 
 # Generic WebSocket setup
@@ -155,23 +155,24 @@ async def websocket_resource_flavor_details(websocket: WebSocket, cluster_queue_
 
 
 # New WebSocket endpoint for individual workload updates
-@app.websocket("/ws/workload/{workload_name}")
-async def websocket_workload(websocket: WebSocket, workload_name: str):
-    await websocket_handler(websocket, lambda: get_workload_by_name(workload_name), f"/ws/workload/{workload_name}")
+@app.websocket("/ws/workload/{namespace}/{workload_name}")
+async def websocket_workload(websocket: WebSocket, namespace: str, workload_name: str):
+    await websocket_handler(websocket, lambda: get_workload_by_name(namespace, workload_name), f"/ws/workload/{namespace}/{workload_name}")
 
-@app.websocket("/ws/workload/{workload_name}/events")
-async def websocket_workload_events(websocket: WebSocket, workload_name: str):
-    await manager.connect(websocket, f"/ws/workload/{workload_name}/events")
+
+@app.websocket("/ws/workload/{namespace}/{workload_name}/events")
+async def websocket_workload_events(websocket: WebSocket,  namespace: str, workload_name: str):
+    await manager.connect(websocket, f"/ws/workload/{namespace}/{workload_name}/events")
     try:
         while True:
-            events = get_events_by_workload_name(workload_name)
-            await manager.broadcast(events, f"/ws/workload/{workload_name}/events")
+            events = get_events_by_workload_name(namespace, workload_name)
+            await manager.broadcast(events, f"/ws/workload/{namespace}/{workload_name}/events")
             await asyncio.sleep(5)  # Polling interval for new events
     except WebSocketDisconnect:
-        manager.disconnect(websocket, f"/ws/workload/{workload_name}/events")
+        manager.disconnect(websocket, f"/ws/workload/{namespace}/{workload_name}/events")
     except Exception as e:
         print(f"Unhandled exception in WebSocket events endpoint for {workload_name}: {e}")
-        manager.disconnect(websocket, f"/ws/workload/{workload_name}/events")
+        manager.disconnect(websocket, f"/ws/workload/{namespace}/{workload_name}/events")
 
 @app.websocket("/ws/resource-flavors")
 async def websocket_resource_flavors(websocket: WebSocket):
@@ -181,13 +182,15 @@ async def websocket_resource_flavors(websocket: WebSocket):
 async def websocket_resource_flavor_details(websocket: WebSocket, flavor_name: str):
     await websocket_handler(websocket, lambda: get_resource_flavor_details(flavor_name), f"/ws/resource-flavor/{flavor_name}")
 
-@app.websocket("/ws/local-queue/{queue_name}")
-async def websocket_local_queue_details(websocket: WebSocket, queue_name: str):
-    await websocket_handler(websocket, lambda: get_local_queue_details(queue_name), f"/ws/local-queue/{queue_name}")
+@app.websocket("/ws/local-queue/{namespace}/{queue_name}")
+async def websocket_local_queue_details(websocket: WebSocket, namespace: str, queue_name: str):
+    await websocket_handler(websocket, 
+                            lambda: get_local_queue_details(namespace, queue_name), 
+                            f"/ws/local-queue/{namespace}/{queue_name}")
 
-@app.websocket("/ws/local-queue/{queue_name}/workloads")
-async def websocket_local_queue_workloads(websocket: WebSocket, queue_name: str):
-    await websocket_handler(websocket, lambda: get_admitted_workloads(queue_name), f"/ws/local-queue/{queue_name}/workloads")
+@app.websocket("/ws/local-queue/{namespace}/{queue_name}/workloads")
+async def websocket_local_queue_workloads(websocket: WebSocket,  namespace: str, queue_name: str):
+    await websocket_handler(websocket, lambda: get_admitted_workloads(namespace, queue_name), f"/ws/local-queue/{namespace}/{queue_name}/workloads")
 
 @app.websocket("/ws/cohorts")
 async def websocket_cohorts(websocket: WebSocket):

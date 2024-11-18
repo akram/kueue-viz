@@ -26,8 +26,8 @@ const App = () => {
         <Route path="/cohorts" element={<Cohorts />} />
 
 
-        <Route path="/workload/:workloadName" element={<WorkloadDetail />} />
-        <Route path="/local-queue/:queueName" element={<LocalQueueDetail />} />
+        <Route path="/workload/:namespace/:workloadName" element={<WorkloadDetail />} />
+        <Route path="/local-queue/:namespace/:queueName" element={<LocalQueueDetail />} />
         <Route path="/cluster-queue/:clusterQueueName" element={<ClusterQueueDetail />} />
         <Route path="/resource-flavor/:flavorName" element={<ResourceFlavorDetail />} />
         <Route path="/cohort/:cohortName" element={<CohortDetail />} />
