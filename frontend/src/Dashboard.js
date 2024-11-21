@@ -1,4 +1,4 @@
-import { Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, Typography, IconButton, Collapse } from '@mui/material';
+import { Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, Typography, IconButton, Collapse, Button } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
@@ -6,12 +6,13 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import useWebSocket from './useWebSocket';
 import './App.css';
-import { AccessTime, CheckCircle } from '@mui/icons-material';
+import { AccessTime, Check, CheckBox, CheckCircle } from '@mui/icons-material';
 
 const Dashboard = () => {
   const [queues, setQueues] = useState([]);
   const [workloads, setWorkloads] = useState([]);
   const [expandedRows, setExpandedRows] = useState({});
+  const [expandAll, setExpandAll] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [workloadsByUid, setWorkloadsByUid] = useState({});
@@ -41,14 +42,24 @@ const Dashboard = () => {
     }));
   };
 
+  const toggleExpandAll = () => {
+    const newExpandAll = !expandAll;
+    setExpandAll(newExpandAll);
+    const newExpandedRows = {};
+    workloads.forEach(workload => {
+      newExpandedRows[workload.metadata.name] = newExpandAll;
+    });
+    setExpandedRows(newExpandedRows);
+  };
+
   const formatPreemptedTextWithTooltip = (preemptedCondition) => {
     if (!preemptedCondition) return "";
 
     const preemptedText = `${preemptedCondition.type}: ${preemptedCondition.message || ""}`;
 
-  // Match UID pattern in the message
-  const uidPattern = /\(UID: ([0-9a-fA-F-]+)\)/;
-  const parts = preemptedText.split(uidPattern);
+    // Match UID pattern in the message
+    const uidPattern = /\(UID: ([0-9a-fA-F-]+)\)/;
+    const parts = preemptedText.split(uidPattern);
 
     return (
       <Tooltip
@@ -94,7 +105,7 @@ const Dashboard = () => {
           <Paper elevation={3} style={{ padding: '16px' }}>
             <Typography variant="h6">Completed Workloads</Typography>
             <Typography variant="h3">
-              {workloads.filter(wl => 
+              {workloads.filter(wl =>
                 wl.status?.conditions?.some(
                   condition => condition.type === "Finished" && condition.status === "True"
                 )
@@ -112,7 +123,11 @@ const Dashboard = () => {
           <TableHead>
             <TableRow>
               <TableCell className="name-column">Namespace</TableCell>
-              <TableCell className="icon-column"></TableCell>
+              <TableCell className="icon-column">
+                <IconButton variant="contained" color="primary" onClick={toggleExpandAll}>
+                  {expandAll ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                </IconButton>
+              </TableCell>
               <TableCell className="name-column">Name</TableCell>
               <TableCell className="pods-count-column">Pods Count</TableCell>
               <TableCell className="status-column">Status</TableCell>
@@ -139,8 +154,8 @@ const Dashboard = () => {
               return (
                 <React.Fragment key={workload.metadata.name}>
                   <TableRow>
-                  <TableCell className="name-column">{workload.metadata.namespace}</TableCell>
-                  <TableCell className="icon-column">
+                    <TableCell className="name-column">{workload.metadata.namespace}</TableCell>
+                    <TableCell className="icon-column">
                       <IconButton onClick={() => toggleRow(workload.metadata.name)}>
                         {isExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
                       </IconButton>
@@ -174,12 +189,12 @@ const Dashboard = () => {
                     <TableCell className="priority-class-column">{workload.spec.priorityClassName || "N/A"}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell colSpan={11} style={{ paddingBottom: 0, paddingTop: 0 }}>
+                    <TableCell colSpan={12} style={{ paddingBottom: 0, paddingTop: 0 }}>
                       <Collapse in={isExpanded} timeout="auto" unmountOnExit>
                         <Table size="small">
                           <TableHead>
                             <TableRow>
-                            <TableCell className="icon-column"></TableCell>
+                              <TableCell className="icon-column"></TableCell>
                               <TableCell className="tree-indicator-column">|</TableCell>
                               <TableCell className="pod-name-column">Pod Name</TableCell>
                               <TableCell className="pod-status-column">Status</TableCell>
