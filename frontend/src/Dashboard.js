@@ -17,7 +17,7 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
   const [workloadsByUid, setWorkloadsByUid] = useState({});
 
-  const { data: kueueData, error: kueueError } = useWebSocket('/ws/kueue');
+  const { data: kueueData, error: kueueError } = useWebSocket('/ws/workloads/dashboard');
 
   useEffect(() => {
     if (kueueData) {

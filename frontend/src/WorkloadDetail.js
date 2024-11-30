@@ -25,7 +25,7 @@ const WorkloadDetail = () => {
   if (workloadError) return <Typography color="error">{workloadError}</Typography>;
 
   return (
-    <Paper style={{ padding: '16px', marginTop: '20px' }}>
+    <Paper style={{ padding: '16px', marginTop: '20px' , alignContent: 'left', alignItems: 'left' }}>
       <Typography variant="h4" gutterBottom>Workload Detail: {namespace}/{workloadName}</Typography>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>

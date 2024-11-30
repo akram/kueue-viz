@@ -6,7 +6,7 @@ import useWebSocket from './useWebSocket';
 import './App.css';
 
 const Workloads = () => {
-  const { data: data, error } = useWebSocket('/ws/kueue');
+  const { data: data, error } = useWebSocket('/ws/workloads');
   const [workloads, setWorkloads] = useState([]);
   useEffect(() => {
     setWorkloads(data?.workloads?.items || []);
