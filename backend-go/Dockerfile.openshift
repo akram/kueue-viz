@@ -27,7 +27,7 @@ FROM golang:latest
 ENV PORT=8080
 
 # Create a non-root user
-RUN adduser -D -g '' appuser
+RUN adduser -D  appuser
 
 # Set the working directory
 WORKDIR /app
