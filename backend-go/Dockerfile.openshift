@@ -21,7 +21,7 @@ RUN go build -o app .
 FROM golang:latest
 
 # Install CA certificates for HTTPS support
-RUN apk add --no-cache ca-certificates
+# RUN apk add --no-cache ca-certificates
 
 # Set environment variables
 ENV PORT=8080
