@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:latest
+FROM golang:latest as builder
 
 # Install necessary tools for building
 RUN apk add --no-cache gcc musl-dev
