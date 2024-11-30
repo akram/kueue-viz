@@ -19,7 +19,7 @@ RUN go build -o app .
 
 # Runtime stage
 FROM golang:latest
-
+USER root
 # Install CA certificates for HTTPS support
 # RUN apk add --no-cache ca-certificates
 
