@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/akram/kueue-viz-go/handlers"
@@ -12,10 +11,12 @@ import (
 )
 
 func main() {
+	// Start pprof server for profiling
 	go func() {
-		err := http.ListenAndServe("localhost:6060", nil)
-		fmt.Println("Listen for pprof on port 6060")
-		log.Println(err)
+		log.Println("Starting pprof server on :6060")
+		if err := http.ListenAndServe("localhost:6060", nil); err != nil {
+			log.Fatalf("Error starting pprof server: %v", err)
+		}
 	}()
 
 	k8sClient, dynamicClient, err := createK8sClient()

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/akram/kueue-viz-go/utils"
 	"github.com/gin-gonic/gin"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -13,9 +14,10 @@ import (
 
 // ResourceFlavorsWebSocketHandler streams all resource flavors
 func ResourceFlavorsWebSocketHandler(dynamicClient dynamic.Interface) gin.HandlerFunc {
-
 	return GenericWebSocketHandler(dynamicClient, ResourceFlavorsGVR(), "", func() (interface{}, error) {
-		return fetchResourceFlavors(dynamicClient)
+		return utils.MeasureTime("fetchResourceFlavors", func() (interface{}, error) {
+			return fetchResourceFlavors(dynamicClient)
+		})
 	})
 }
 
