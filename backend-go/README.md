@@ -20,7 +20,7 @@ This Go application provides WebSocket endpoints for interacting with Kueue reso
 
 Run the following command to build the application:
 ```bash
-go build -o kueue_ws_app
+CGO_ENABLED=0 go build -o kueue_ws_app
 ```
 
 ## Run
