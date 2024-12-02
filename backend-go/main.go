@@ -23,8 +23,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error creating Kubernetes client: %v", err)
 	}
+	r := gin.New()
+	r.Use(gin.Logger())
+	r.SetTrustedProxies(nil)
 
-	r := gin.Default()
 	handlers.InitializeWebSocketRoutes(r, dynamicClient, k8sClient)
 
 	if err := r.Run(":8080"); err != nil {
