@@ -27,7 +27,7 @@ const Dashboard = () => {
 
       kueueData.workloads.items.forEach(workload => {
         if (workload.preemption?.preempted) {
-          toast.error(`Workload ${workload.metadata.name} was preempted: ${workload.preemption.reason}`);
+          toast.error(`Workload ${workload.metadata?.name} was preempted: ${workload.preemption.reason}`);
         }
       });
     }
@@ -47,7 +47,7 @@ const Dashboard = () => {
     setExpandAll(newExpandAll);
     const newExpandedRows = {};
     workloads.forEach(workload => {
-      newExpandedRows[workload.metadata.name] = newExpandAll;
+      newExpandedRows[workload.metadata?.name] = newExpandAll;
     });
     setExpandedRows(newExpandedRows);
   };

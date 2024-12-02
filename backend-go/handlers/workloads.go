@@ -14,7 +14,6 @@ func WorkloadsWebSocketHandler(dynamicClient dynamic.Interface, k8sClient *kuber
 	return GenericWebSocketHandler(dynamicClient, WorkloadsGVR(), "", func() (interface{}, error) {
 		workloads, err := fetchWorkloads(dynamicClient)
 		result := map[string]interface{}{
-			"toto":      "tata",
 			"workloads": workloads,
 		}
 		return result, err
@@ -31,11 +30,15 @@ func WorkloadDetailsWebSocketHandler(dynamicClient dynamic.Interface) gin.Handle
 	}
 }
 
-func fetchWorkloads(dynamicClient dynamic.Interface) ([]interface{}, error) {
-	_, err := dynamicClient.Resource(WorkloadsGVR()).List(context.TODO(), metav1.ListOptions{})
-	return nil, err
-
+// Fetch all resource flavors
+func fetchWorkloads(dynamicClient dynamic.Interface) (interface{}, error) {
+	result, err := dynamicClient.Resource(WorkloadsGVR()).List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("error fetching resource flavors: %v", err)
+	}
+	return result, nil
 }
+
 func fetchWorkloadDetails(dynamicClient dynamic.Interface, namespace, workloadName string) (interface{}, error) {
 	result, err := dynamicClient.Resource(WorkloadsGVR()).Namespace(namespace).Get(context.TODO(), workloadName, metav1.GetOptions{})
 	if err != nil {

@@ -13,7 +13,7 @@ import (
 )
 
 type WorkloadResponse struct {
-	Items          []map[string]interface{} `json:"items"`
+	Items          []map[string]interface{} `json:"workloads"`
 	WorkloadsByUID map[string]string        `json:"workloads_by_uid"`
 }
 
@@ -21,34 +21,44 @@ type WorkloadResponse struct {
 func WorkloadsDashboardWebSocketHandler(dynamicClient dynamic.Interface, k8sClient *kubernetes.Clientset) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		GenericWebSocketHandler(dynamicClient, schema.GroupVersionResource{}, "", func() (interface{}, error) {
-			return fetchWorkloadsDashboardData(dynamicClient)
+			return fetchDashboardData(dynamicClient)
 		})(c)
 	}
 }
 
-func fetchWorkloadsDashboardData(dynamicClient dynamic.Interface) ([]interface{}, error) {
+func fetchDashboardData(dynamicClient dynamic.Interface) (map[string]interface{}, error) {
+	resourceFlavors, _ := fetchResourceFlavors(dynamicClient)
+	clusterQueues, _ := fetchClusterQueues(dynamicClient)
+	localQueues, _ := fetchLocalQueues(dynamicClient)
+	result := map[string]interface{}{
+		"flavors":       resourceFlavors,
+		"clusterQueues": clusterQueues,
+		"queues":        localQueues,
+		"workloads":     fetchWorkloadsDashboardData(dynamicClient),
+	}
+	return result, nil
+
+}
+
+func fetchWorkloadsDashboardData(dynamicClient dynamic.Interface) interface{} {
 	workloadList, err := dynamicClient.Resource(WorkloadsGVR()).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("error fetching workloads: %v", err)
+		fmt.Printf("error fetching workloads: %v", err)
 	}
-
 	workloadsByUID := make(map[string]string)
-	var processedWorkloads []map[string]interface{}
-
+	var processedWorkloads []unstructured.Unstructured
 	for _, workload := range workloadList.Items {
 		metadata, _, _ := unstructured.NestedMap(workload.Object, "metadata")
-		status, _, _ := unstructured.NestedMap(workload.Object, "status")
 		labels, _, _ := unstructured.NestedStringMap(metadata, "labels")
 		namespace := metadata["namespace"].(string)
 		workloadName := metadata["name"].(string)
 		workloadUID := metadata["uid"].(string)
 		jobUID := labels["kueue.x-k8s.io/job-uid"]
-
 		podList, err := dynamicClient.Resource(PodsGVR()).Namespace(namespace).List(context.TODO(), metav1.ListOptions{})
 		if err != nil {
-			return nil, fmt.Errorf("error fetching pods in namespace %s: %v", namespace, err)
+			fmt.Printf("error fetching pods in namespace %s: %v", namespace, err)
+			return nil
 		}
-
 		var workloadPods []map[string]interface{}
 		for _, pod := range podList.Items {
 			podLabels, _, _ := unstructured.NestedStringMap(pod.Object, "metadata", "labels")
@@ -61,42 +71,38 @@ func fetchWorkloadsDashboardData(dynamicClient dynamic.Interface) ([]interface{}
 				workloadPods = append(workloadPods, podDetails)
 			}
 		}
-
-		// Serialize pods as {} when no pods exist
-		var serializedPods interface{}
-		if len(workloadPods) == 0 {
-			serializedPods = map[string]interface{}{} // Empty object
-		} else {
-			serializedPods = workloadPods
-		}
-
-		preempted := false
-		if preemptedVal, ok := status["preempted"].(bool); ok {
-			preempted = preemptedVal
-		} else {
-			preempted = false // Default to false if not found or not a bool
-		}
-
-		preemptionReason := "None"
-		if reason, ok := status["preemptionReason"].(string); ok {
-			preemptionReason = reason
-		}
-
-		processedWorkload := map[string]interface{}{
-			"name":       workloadName,
-			"namespace":  namespace,
-			"pods":       serializedPods,
-			"preemption": map[string]interface{}{"preempted": preempted, "reason": preemptionReason},
-		}
-		processedWorkloads = append(processedWorkloads, processedWorkload)
+		processedWorkloads = append(processedWorkloads, workload)
 		workloadsByUID[workloadUID] = workloadName
 	}
-
-	workloadResponse := &WorkloadResponse{
-		Items:          processedWorkloads,
-		WorkloadsByUID: workloadsByUID,
+	workloads := map[string]interface{}{
+		"items":            processedWorkloads,
+		"workloads_by_uid": workloadsByUID,
 	}
+	return workloads
+}
 
-	return []interface{}{&workloadResponse}, nil
+// removeManagedFields recursively removes "managedFields" from maps and slices.
+func removeManagedFields(obj interface{}) interface{} {
+	switch val := obj.(type) {
+	case map[string]interface{}:
+		// Remove "managedFields" if present
+		delete(val, "managedFields")
 
+		// Recursively apply to nested items
+		for key, value := range val {
+			val[key] = removeManagedFields(value)
+		}
+		return val
+
+	case []interface{}:
+		// Recursively apply to each item in the list
+		for i, item := range val {
+			val[i] = removeManagedFields(item)
+		}
+		return val
+
+	default:
+		// Return the object as is if it's neither a map nor a slice
+		return obj
+	}
 }

@@ -23,7 +23,6 @@ func ResourceFlavorsWebSocketHandler(dynamicClient dynamic.Interface) gin.Handle
 func ResourceFlavorDetailsWebSocketHandler(dynamicClient dynamic.Interface) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		flavorName := c.Param("flavor_name")
-
 		GenericWebSocketHandler(dynamicClient, ResourceFlavorsGVR(), "", func() (interface{}, error) {
 			return fetchResourceFlavorDetails(dynamicClient, flavorName)
 		})(c)
