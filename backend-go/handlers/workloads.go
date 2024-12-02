@@ -30,7 +30,6 @@ func WorkloadDetailsWebSocketHandler(dynamicClient dynamic.Interface) gin.Handle
 	}
 }
 
-// Fetch all resource flavors
 func fetchWorkloads(dynamicClient dynamic.Interface) (interface{}, error) {
 	result, err := dynamicClient.Resource(WorkloadsGVR()).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
@@ -40,11 +39,50 @@ func fetchWorkloads(dynamicClient dynamic.Interface) (interface{}, error) {
 }
 
 func fetchWorkloadDetails(dynamicClient dynamic.Interface, namespace, workloadName string) (interface{}, error) {
-	result, err := dynamicClient.Resource(WorkloadsGVR()).Namespace(namespace).Get(context.TODO(), workloadName, metav1.GetOptions{})
+	// Fetch the workload details
+	workload, err := dynamicClient.Resource(WorkloadsGVR()).Namespace(namespace).Get(context.TODO(), workloadName, metav1.GetOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("error fetching details for workload %s: %v", workloadName, err)
+		return nil, fmt.Errorf("error fetching workload %s: %v", workloadName, err)
 	}
-	return result.Object, nil
+
+	// Add preemption details if available
+	preempted := false
+	if status, ok := workload.Object["status"].(map[string]interface{}); ok {
+		preempted, _ = status["preempted"].(bool)
+	}
+	preemptionReason := "None"
+	if reason, ok := workload.Object["status"].(map[string]interface{})["preemptionReason"].(string); ok {
+		preemptionReason = reason
+	}
+	workload.Object["preemption"] = map[string]interface{}{
+		"preempted": preempted,
+		"reason":    preemptionReason,
+	}
+
+	// Get the local queue name from workload's spec
+	localQueueName := ""
+	if spec, ok := workload.Object["spec"].(map[string]interface{}); ok {
+		localQueueName, _ = spec["queueName"].(string)
+	}
+
+	// If local queue name is found, fetch the local queue and its cluster queue
+	if localQueueName != "" {
+		localQueue, err := dynamicClient.Resource(LocalQueuesGVR()).Namespace(namespace).Get(context.TODO(), localQueueName, metav1.GetOptions{})
+		if err != nil {
+			return nil, fmt.Errorf("error fetching local queue %s: %v", localQueueName, err)
+		}
+		// Retrieve the targeted cluster queue name from the local queue's spec
+		if spec, ok := localQueue.Object["spec"].(map[string]interface{}); ok {
+			clusterQueueName, _ := spec["clusterQueue"].(string)
+			workload.Object["clusterQueueName"] = clusterQueueName
+		} else {
+			workload.Object["clusterQueueName"] = "Unknown"
+		}
+	} else {
+		workload.Object["clusterQueueName"] = "Unknown"
+	}
+
+	return workload, nil
 }
 
 func WorkloadEventsWebSocketHandler(dynamicClient dynamic.Interface) gin.HandlerFunc {
