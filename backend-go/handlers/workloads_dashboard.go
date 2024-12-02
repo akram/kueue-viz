@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/gin-gonic/gin" // Import v1 for Pod and PodStatus
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -30,11 +31,12 @@ func fetchDashboardData(dynamicClient dynamic.Interface) (map[string]interface{}
 	resourceFlavors, _ := fetchResourceFlavors(dynamicClient)
 	clusterQueues, _ := fetchClusterQueues(dynamicClient)
 	localQueues, _ := fetchLocalQueues(dynamicClient)
+	workloads := fetchWorkloadsDashboardData(dynamicClient)
 	result := map[string]interface{}{
-		"flavors":       resourceFlavors,
-		"clusterQueues": clusterQueues,
-		"queues":        localQueues,
-		"workloads":     fetchWorkloadsDashboardData(dynamicClient),
+		"flavors":       removeManagedFields(resourceFlavors),
+		"clusterQueues": removeManagedFields(clusterQueues),
+		"queues":        removeManagedFields(localQueues),
+		"workloads":     removeManagedFields(workloads),
 	}
 	return result, nil
 
@@ -45,20 +47,27 @@ func fetchWorkloadsDashboardData(dynamicClient dynamic.Interface) interface{} {
 	if err != nil {
 		fmt.Printf("error fetching workloads: %v", err)
 	}
+
+	workloadList = removeManagedFieldsFromUnstructuredList(workloadList)
 	workloadsByUID := make(map[string]string)
 	var processedWorkloads []unstructured.Unstructured
+
 	for _, workload := range workloadList.Items {
 		metadata, _, _ := unstructured.NestedMap(workload.Object, "metadata")
+		status, _, _ := unstructured.NestedMap(workload.Object, "status")
 		labels, _, _ := unstructured.NestedStringMap(metadata, "labels")
 		namespace := metadata["namespace"].(string)
 		workloadName := metadata["name"].(string)
 		workloadUID := metadata["uid"].(string)
 		jobUID := labels["kueue.x-k8s.io/job-uid"]
+
 		podList, err := dynamicClient.Resource(PodsGVR()).Namespace(namespace).List(context.TODO(), metav1.ListOptions{})
+		podList = removeManagedFieldsFromUnstructuredList(podList)
 		if err != nil {
 			fmt.Printf("error fetching pods in namespace %s: %v", namespace, err)
 			return nil
 		}
+
 		var workloadPods []map[string]interface{}
 		for _, pod := range podList.Items {
 			podLabels, _, _ := unstructured.NestedStringMap(pod.Object, "metadata", "labels")
@@ -71,14 +80,61 @@ func fetchWorkloadsDashboardData(dynamicClient dynamic.Interface) interface{} {
 				workloadPods = append(workloadPods, podDetails)
 			}
 		}
-		processedWorkloads = append(processedWorkloads, workload)
+
+		preempted := false
+		if preemptedVal, ok := status["preempted"].(bool); ok {
+			preempted = preemptedVal
+		} else {
+			preempted = false // Default to false if not found or not a bool
+		}
+
+		preemptionReason := "None"
+		if reason, ok := status["preemptionReason"].(string); ok {
+			preemptionReason = reason
+		}
+
+		preemption := map[string]interface{}{"preempted": preempted, "reason": preemptionReason}
+		unstructured.SetNestedField(workload.Object, preemption, "preemption")
+		addPodsToWorkload(&workload, workloadPods)
 		workloadsByUID[workloadUID] = workloadName
+		processedWorkloads = append(processedWorkloads, workload)
 	}
 	workloads := map[string]interface{}{
 		"items":            processedWorkloads,
 		"workloads_by_uid": workloadsByUID,
 	}
+
 	return workloads
+}
+
+func addPodsToWorkload(workload *unstructured.Unstructured, pods []map[string]interface{}) error {
+	// Convert []map[string]interface{} to []interface{}
+	var podsInterface []interface{}
+	for _, pod := range pods {
+		podsInterface = append(podsInterface, pod)
+	}
+
+	// Add pods as a field named "pods" in workload.Object
+	err := unstructured.SetNestedField(workload.Object, podsInterface, "pods")
+	if err != nil {
+		log.Printf("Error setting pods in workload: %v", err)
+		return err
+	}
+	return nil
+}
+
+// RemoveManagedFieldsFromUnstructuredList removes "managedFields" recursively from *unstructured.UnstructuredList
+func removeManagedFieldsFromUnstructuredList(list *unstructured.UnstructuredList) *unstructured.UnstructuredList {
+	for i, item := range list.Items {
+		list.Items[i] = *removeManagedFieldsFromUnstructured(&item)
+	}
+	return list
+}
+
+// RemoveManagedFieldsFromUnstructured removes "managedFields" recursively from *unstructured.Unstructured
+func removeManagedFieldsFromUnstructured(obj *unstructured.Unstructured) *unstructured.Unstructured {
+	obj.Object = removeManagedFields(obj.Object).(map[string]interface{})
+	return obj
 }
 
 // removeManagedFields recursively removes "managedFields" from maps and slices.
