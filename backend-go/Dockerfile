@@ -1,8 +1,8 @@
 # Build stage
-FROM golang:1.22.0-alpine AS builder
+FROM golang:latest as builder
 
 # Install necessary tools for building
-RUN apk add --no-cache gcc musl-dev
+# RUN apk add --no-cache gcc musl-dev
 
 # Set the working directory
 WORKDIR /app
@@ -18,16 +18,17 @@ COPY . .
 RUN go build -o app .
 
 # Runtime stage
-FROM alpine:3.18
-
+FROM golang:latest
+USER root
 # Install CA certificates for HTTPS support
-RUN apk add --no-cache ca-certificates
+# RUN apk add --no-cache ca-certificates
 
 # Set environment variables
 ENV PORT=8080
 
 # Create a non-root user
-RUN adduser -D -g '' appuser
+# RUN adduser -D  appuser
+# USER nobody
 
 # Set the working directory
 WORKDIR /app
@@ -36,10 +37,11 @@ WORKDIR /app
 COPY --from=builder /app/app .
 
 # Change ownership to the non-root user
-RUN chown -R appuser:appuser /app
+RUN useradd nobody || true && groupadd nobody || true
+RUN chown -R nobody:nobody /app
 
 # Run as the non-root user
-USER appuser
+USER nobody
 
 # Expose the application port
 EXPOSE 8080

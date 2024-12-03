@@ -16,3 +16,10 @@ Run the backend locally using release mode. Logging is only set for fatal and er
 make run
 ```
 
+## Local container run
+
+```
+podman build . -t backend
+podman run -v $HOME/.kube:/nonexistent/.kube/ -p 8080:8080 backend
+```
+
