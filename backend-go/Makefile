@@ -16,7 +16,7 @@ build:
 ## Run the application
 run: build
 	@echo "Running the application..."
-	./bin/$(APP_NAME)
+	GIN_MODE=release ./bin/$(APP_NAME)
 
 ## Run debug
 debug: build

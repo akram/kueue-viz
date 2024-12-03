@@ -13,11 +13,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-type WorkloadResponse struct {
-	Items          []map[string]interface{} `json:"workloads"`
-	WorkloadsByUID map[string]string        `json:"workloads_by_uid"`
-}
-
 // WorkloadsDashboardWebSocketHandler streams workloads along with attached pod details
 func WorkloadsDashboardWebSocketHandler(dynamicClient dynamic.Interface, k8sClient *kubernetes.Clientset) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -123,7 +118,7 @@ func addPodsToWorkload(workload *unstructured.Unstructured, pods []map[string]in
 	return nil
 }
 
-// RemoveManagedFieldsFromUnstructuredList removes "managedFields" recursively from *unstructured.UnstructuredList
+// removeManagedFieldsFromUnstructuredList removes "managedFields" recursively from *unstructured.UnstructuredList
 func removeManagedFieldsFromUnstructuredList(list *unstructured.UnstructuredList) *unstructured.UnstructuredList {
 	for i, item := range list.Items {
 		list.Items[i] = *removeManagedFieldsFromUnstructured(&item)
@@ -131,7 +126,7 @@ func removeManagedFieldsFromUnstructuredList(list *unstructured.UnstructuredList
 	return list
 }
 
-// RemoveManagedFieldsFromUnstructured removes "managedFields" recursively from *unstructured.Unstructured
+// removeManagedFieldsFromUnstructured removes "managedFields" recursively from *unstructured.Unstructured
 func removeManagedFieldsFromUnstructured(obj *unstructured.Unstructured) *unstructured.Unstructured {
 	obj.Object = removeManagedFields(obj.Object).(map[string]interface{})
 	return obj

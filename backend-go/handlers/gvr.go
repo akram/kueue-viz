@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	metav1beta1 "k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 // Define the GroupVersionResource for ResourceFlavors
@@ -69,7 +68,7 @@ func NodeGVR() schema.GroupVersionResource {
 }
 
 func EventsGVR() schema.GroupVersionResource {
-	eventsGVR := metav1beta1.GroupVersionResource{
+	eventsGVR := schema.GroupVersionResource{
 		Group:    "",
 		Version:  "v1",
 		Resource: "events",

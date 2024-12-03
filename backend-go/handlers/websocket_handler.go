@@ -15,7 +15,6 @@ import (
 // WebSocket upgrader
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
-		// Allow all connections (adjust this for your security requirements)
 		return true
 	},
 }
@@ -36,7 +35,7 @@ func GenericWebSocketHandler(dynamicClient dynamic.Interface, resource schema.Gr
 		defer conn.Close()
 		log.Debug("WebSocket connection established took %v", "duration", time.Since(connStart))
 
-		// Fetch the initial data and send it immediately
+		// Fetch the initial data to send it immediately
 		fetchStart := time.Now()
 		data, err := dataFetcher()
 		if err != nil {
@@ -68,6 +67,7 @@ func GenericWebSocketHandler(dynamicClient dynamic.Interface, resource schema.Gr
 		log.Debug("Initial message sent to client took %v", "duration", time.Since(writeStart))
 
 		// Start a ticker for periodic updates (every 5 seconds)
+		// TODO use SharedInformers and TTL to only send updates if they happen
 		ticker := time.NewTicker(5 * time.Second)
 		defer ticker.Stop()
 
