@@ -3,10 +3,12 @@ package handlers
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/gin-gonic/gin"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/dynamic"
 )
@@ -50,76 +52,89 @@ func fetchResourceFlavors(dynamicClient dynamic.Interface) (interface{}, error) 
 
 // Fetch details for a specific Resource Flavor
 func fetchResourceFlavorDetails(dynamicClient dynamic.Interface, flavorName string) (map[string]interface{}, error) {
-
-	// Fetch the specific ResourceFlavor
-	resourceFlavor, err := dynamicClient.Resource(ResourceFlavorGVR()).Get(context.TODO(), flavorName, metav1.GetOptions{})
+	// Fetch the specified resource flavor details
+	flavor, err := dynamicClient.Resource(ResourceFlavorsGVR()).Get(context.TODO(), flavorName, metav1.GetOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("error fetching resource flavor %s: %v", flavorName, err)
 	}
 
-	// List all ClusterQueues
+	// List all cluster queues
 	clusterQueues, err := dynamicClient.Resource(ClusterQueueGVR()).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("error fetching cluster queues: %v", err)
+		return nil, fmt.Errorf("error listing cluster queues: %v", err)
 	}
 
-	var queuesUsingFlavor []map[string]interface{}
+	queuesUsingFlavor := []map[string]interface{}{}
 
-	// Iterate through each ClusterQueue to see if it uses the specified flavor
-	for _, queue := range clusterQueues.Items {
-		queueName := queue.GetName()
-		spec, specExists := queue.Object["spec"].(map[string]interface{})
-		if !specExists {
-			continue
-		}
-		resourceGroups, _ := spec["resourceGroups"].([]interface{})
+	// Iterate through each cluster queue to find queues using the specified flavor
+	for _, item := range clusterQueues.Items {
+		queueName, _, _ := unstructured.NestedString(item.Object, "metadata", "name")
+		resourceGroups, _, _ := unstructured.NestedSlice(item.Object, "spec", "resourceGroups")
 
-		// Check each resource group and flavor
 		for _, group := range resourceGroups {
 			groupMap, ok := group.(map[string]interface{})
 			if !ok {
 				continue
 			}
-			flavors, _ := groupMap["flavors"].([]interface{})
-			for _, f := range flavors {
-				flavor, ok := f.(map[string]interface{})
+			flavors, _, _ := unstructured.NestedSlice(groupMap, "flavors")
+
+			for _, fl := range flavors {
+				flavorMap, ok := fl.(map[string]interface{})
 				if !ok {
 					continue
 				}
-				if flavor["name"] == flavorName {
+				name, _, _ := unstructured.NestedString(flavorMap, "name")
+				if name == flavorName {
 					// Collect resource and quota information
-					var quotaInfo []map[string]interface{}
-					resources, _ := flavor["resources"].([]interface{})
-					for _, r := range resources {
-						resource, ok := r.(map[string]interface{})
+					quotaInfo := []map[string]interface{}{}
+					resources, _, _ := unstructured.NestedSlice(flavorMap, "resources")
+
+					for _, res := range resources {
+						resMap, ok := res.(map[string]interface{})
 						if !ok {
 							continue
 						}
+						resourceName, _, _ := unstructured.NestedString(resMap, "name")
+						nominalQuota, _, _ := unstructured.NestedString(resMap, "nominalQuota")
+
 						quotaInfo = append(quotaInfo, map[string]interface{}{
-							"resource":     resource["name"],
-							"nominalQuota": resource["nominalQuota"],
+							"resource":     resourceName,
+							"nominalQuota": nominalQuota,
 						})
 					}
+
 					queuesUsingFlavor = append(queuesUsingFlavor, map[string]interface{}{
 						"queueName": queueName,
 						"quota":     quotaInfo,
 					})
-					break
+					//log.Println(queuesUsingFlavor)
+					break // Stop searching this queue once the flavor is found
 				}
 			}
 		}
 	}
 
-	// Get nodes matching the flavor
-	matchingNodes, err := getNodesForFlavor(dynamicClient, flavorName)
-	if err != nil {
-		return nil, fmt.Errorf("error fetching nodes for flavor %s: %v", flavorName, err)
-	}
+	// Retrieve matching nodes for the flavor (assumes getNodesForFlavor is implemented)
+	matchingNodes, _ := getNodesForFlavor(dynamicClient, flavorName)
+	log.Println(matchingNodes)
 
-	// Build the response
+	details := map[string]interface{}{
+		"tolerations": []map[string]interface{}{},
+		"taints":      []map[string]interface{}{},
+	}
+	if spec, exists := flavor.Object["spec"]; exists {
+		details = spec.(map[string]interface{})
+	}
+	tolerations, found, err := unstructured.NestedSlice(flavor.Object, "spec", "tolerations")
+	if err == nil && found {
+		details["tolerations"] = tolerations
+	}
+	details["taints"] = queuesUsingFlavor
+
+	// Construct the result
 	result := map[string]interface{}{
 		"name":    flavorName,
-		"details": resourceFlavor.Object["spec"],
+		"details": details,
 		"queues":  queuesUsingFlavor,
 		"nodes":   matchingNodes,
 	}
@@ -129,6 +144,12 @@ func fetchResourceFlavorDetails(dynamicClient dynamic.Interface, flavorName stri
 
 // getNodesForFlavor retrieves a list of nodes that match a specific resource flavor.
 func getNodesForFlavor(dynamicClient dynamic.Interface, flavorName string) ([]map[string]interface{}, error) {
+
+	flavor, err := dynamicClient.Resource(ResourceFlavorsGVR()).Get(context.TODO(), flavorName, metav1.GetOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("error fetching resource flavor %s: %v", flavorName, err)
+	}
+
 	// List all nodes
 	nodeList, err := dynamicClient.Resource(NodeGVR()).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
@@ -136,28 +157,49 @@ func getNodesForFlavor(dynamicClient dynamic.Interface, flavorName string) ([]ma
 	}
 
 	var matchingNodes []map[string]interface{}
+	nodeLabels, _, err := unstructured.NestedMap(flavor.Object, "spec", "nodeLabels")
+	if err != nil {
+		return nil, fmt.Errorf("error reading nodeLabels for flavor %s: %v", flavorName, err)
+	}
 
-	// Iterate through each node to find matches for the flavor
+	// Iterate through each node to find matches for the flavor's nodeLabels
 	for _, node := range nodeList.Items {
 		nodeName := node.GetName()
-
 		// Convert the unstructured node object to the corev1.Node type
 		nodeObj := &v1.Node{}
 		err := runtime.DefaultUnstructuredConverter.FromUnstructured(node.Object, nodeObj)
 		if err != nil {
-			return nil, fmt.Errorf("error converting node %s to corev1.Node: %v", nodeName, err)
+			log.Printf("Error converting node %s to corev1.Node: %v", nodeName, err)
+			continue
 		}
-
-		// Check if the node has a label matching the resource flavor
-		if nodeObj.Labels != nil {
-			if _, exists := nodeObj.Labels["flavor.kueue.x-k8s.io/"+flavorName]; exists {
-				matchingNodes = append(matchingNodes, map[string]interface{}{
-					"name":   nodeName,
-					"labels": nodeObj.Labels,
+		// Check if the node has all the labels specified in the flavor
+		if hasMatchingLabels(nodeObj.Labels, nodeLabels) {
+			taints := []map[string]interface{}{}
+			for _, taint := range nodeObj.Spec.Taints {
+				taints = append(taints, map[string]interface{}{
+					"key":    taint.Key,
+					"value":  taint.Value,
+					"effect": string(taint.Effect),
 				})
 			}
+			matchingNodes = append(matchingNodes, map[string]interface{}{
+				"name":        nodeName,
+				"labels":      nodeObj.Labels,
+				"taints":      taints,
+				"tolerations": []v1.Taint{},
+			})
 		}
 	}
-
 	return matchingNodes, nil
+}
+
+// hasMatchingLabels checks if a node's labels contain all the labels specified in nodeLabels.
+func hasMatchingLabels(nodeLabels map[string]string, flavorLabels map[string]interface{}) bool {
+	for key, value := range flavorLabels {
+		strValue, ok := value.(string)
+		if !ok || nodeLabels[key] != strValue {
+			return false
+		}
+	}
+	return true
 }

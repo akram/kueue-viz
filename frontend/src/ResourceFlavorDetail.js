@@ -41,7 +41,7 @@ const ResourceFlavorDetail = () => {
         <Typography variant="body1"><strong>Node Labels:</strong></Typography>
         {details.nodeLabels ? (
           <ul>
-            {Object.entries(details.nodeLabels).map(([key, value]) => (
+            {Object.entries(details.nodeLabels)?.map(([key, value]) => (
               <li key={key}>{key}: {value}</li>
             ))}
           </ul>
@@ -52,7 +52,7 @@ const ResourceFlavorDetail = () => {
         <Typography variant="body1" mt={2}><strong>Node Taints:</strong></Typography>
         {details.nodeTaints?.length ? (
           <ul>
-            {details.nodeTaints.map((taint, index) => (
+            {details.nodeTaints?.map((taint, index) => (
               <li key={index}>
                 {taint.key}={taint.value} ({taint.effect})
               </li>
@@ -65,7 +65,7 @@ const ResourceFlavorDetail = () => {
         <Typography variant="body1" mt={2}><strong>Tolerations:</strong></Typography>
         {details.tolerations?.length ? (
           <ul>
-            {details.tolerations.map((toleration, index) => (
+            {details.tolerations?.map((toleration, index) => (
               <li key={index}>
                 {toleration.key} ({toleration.operator}): {toleration.effect}
               </li>
@@ -92,14 +92,14 @@ const ResourceFlavorDetail = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {queues.map((queue) => (
+                {queues?.map((queue) => (
                   <React.Fragment key={queue.queueName}>
                     <TableRow>
                       <TableCell rowSpan={queue.quota.length}>{queue.queueName}</TableCell>
                       <TableCell>{queue.quota[0].resource}</TableCell>
                       <TableCell>{queue.quota[0].nominalQuota}</TableCell>
                     </TableRow>
-                    {queue.quota.slice(1).map((resource, index) => (
+                    {queue.quota.slice(1)?.map((resource, index) => (
                       <TableRow key={`${queue.queueName}-${resource.resource}-${index}`}>
                         <TableCell>{resource.resource}</TableCell>
                         <TableCell>{resource.nominalQuota}</TableCell>
@@ -129,7 +129,7 @@ const ResourceFlavorDetail = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {nodes.map((node) => (
+                {nodes?.map((node) => (
                   <TableRow key={node.name}>
                     <TableCell>{node.name}</TableCell>
                     <TableCell>

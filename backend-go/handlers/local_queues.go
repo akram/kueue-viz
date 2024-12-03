@@ -29,7 +29,7 @@ func LocalQueueDetailsWebSocketHandler(dynamicClient dynamic.Interface) gin.Hand
 
 // Fetch all local queues
 func fetchLocalQueues(dynamicClient dynamic.Interface) (interface{}, error) {
-	result, err := dynamicClient.Resource(LocalQueuesGVR()).Namespace("").List(context.TODO(), metav1.ListOptions{})
+	result, err := dynamicClient.Resource(LocalQueuesGVR()).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("error fetching local queues: %v", err)
 	}

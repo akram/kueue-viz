@@ -42,15 +42,8 @@ func ClusterQueueDetailsWebSocketHandler(dynamicClient dynamic.Interface) gin.Ha
 
 // Fetch all cluster queues
 func fetchClusterQueues(dynamicClient dynamic.Interface) ([]map[string]interface{}, error) {
-	// Define the GVR for the ClusterQueue resource
-	clusterQueueGVR := schema.GroupVersionResource{
-		Group:    "kueue.x-k8s.io",
-		Version:  "v1beta1",
-		Resource: "clusterqueues",
-	}
-
 	// Fetch the list of ClusterQueue objects
-	clusterQueues, err := dynamicClient.Resource(clusterQueueGVR).List(context.TODO(), metav1.ListOptions{})
+	clusterQueues, err := dynamicClient.Resource(ClusterQueueGVR()).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("error fetching cluster queues: %v", err)
 	}
@@ -113,26 +106,15 @@ func fetchClusterQueues(dynamicClient dynamic.Interface) ([]map[string]interface
 
 // Fetch details for a specific cluster queue
 func fetchClusterQueueDetails(dynamicClient dynamic.Interface, clusterQueueName string) (map[string]interface{}, error) {
-	// Define the GVRs for ClusterQueue and LocalQueue resources
-	clusterQueueGVR := schema.GroupVersionResource{
-		Group:    "kueue.x-k8s.io",
-		Version:  "v1beta1",
-		Resource: "clusterqueues",
-	}
-	localQueueGVR := schema.GroupVersionResource{
-		Group:    "kueue.x-k8s.io",
-		Version:  "v1beta1",
-		Resource: "localqueues",
-	}
 
 	// Fetch the specific ClusterQueue
-	clusterQueue, err := dynamicClient.Resource(clusterQueueGVR).Get(context.TODO(), clusterQueueName, metav1.GetOptions{})
+	clusterQueue, err := dynamicClient.Resource(ClusterQueueGVR()).Get(context.TODO(), clusterQueueName, metav1.GetOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("error fetching cluster queue %s: %v", clusterQueueName, err)
 	}
 
 	// Retrieve all LocalQueues
-	localQueues, err := dynamicClient.Resource(localQueueGVR).List(context.TODO(), metav1.ListOptions{})
+	localQueues, err := dynamicClient.Resource(LocalQueuesGVR()).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("error fetching local queues: %v", err)
 	}
@@ -176,11 +158,6 @@ func fetchClusterQueueDetails(dynamicClient dynamic.Interface, clusterQueueName 
 }
 
 func fetchClusterQueuesList(dynamicClient dynamic.Interface) (*unstructured.UnstructuredList, error) {
-	clusterQueuesGVR := schema.GroupVersionResource{
-		Group:    "kueue.x-k8s.io",
-		Version:  "v1beta1",
-		Resource: "clusterqueues",
-	}
-	clusterQueues, err := dynamicClient.Resource(clusterQueuesGVR).List(context.TODO(), metav1.ListOptions{})
+	clusterQueues, err := dynamicClient.Resource(ClusterQueueGVR()).List(context.TODO(), metav1.ListOptions{})
 	return clusterQueues, err
 }
